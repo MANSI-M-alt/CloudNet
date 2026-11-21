@@ -1,0 +1,1689 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cloud Net | Log Anomaly Detection & Autonomous Self-Healing</title>
+  <link rel="icon" href="https://img.icons8.com/color/48/datadog.png" type="image/png">
+  
+  <!-- Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600;700;800&family=Roboto+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            datadog: {
+              purple: '#632ca6',
+              purpleDark: '#4d1d8a',
+              purpleLight: '#7c3aed',
+              border: '#e1e3e8',
+              bgLight: '#f5f6f8',
+              pink: '#ea3875',
+              blue: '#0275d8',
+              sky: '#38bdf8'
+            }
+          },
+          fontFamily: {
+            sans: ['"Open Sans"', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+            mono: ['"Roboto Mono"', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body class="bg-white text-slate-900 font-sans antialiased">
+
+  <!-- ========================================================================= -->
+  <!-- 1. STICKY TOP NAVIGATION BAR -->
+  <!-- ========================================================================= -->
+  <header class="sticky top-0 z-50 bg-[#3d1b6e]/95 backdrop-blur-md border-b border-purple-900/60 text-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      
+      <!-- Logo + Brand -->
+      <div class="flex items-center space-x-8">
+        <a href="/" class="flex items-center space-x-2.5 group">
+          <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-purple-500 to-pink-500 flex items-center justify-center text-white shadow-md group-hover:scale-105 transition">
+            <i class="fa-solid fa-cloud-bolt text-sm"></i>
+          </div>
+          <div class="flex flex-col">
+            <span class="font-extrabold text-lg tracking-tight text-white leading-none">CLOUD NET</span>
+            <span class="text-[9px] uppercase tracking-wider text-purple-200 font-semibold">Anomaly Detection & Self-Healing</span>
+          </div>
+        </a>
+
+        <!-- Main Nav Links (Single line, whitespace-nowrap) -->
+        <nav class="hidden lg:flex items-center space-x-5 text-xs font-semibold text-purple-100 whitespace-nowrap">
+          <a href="#product" class="hover:text-white transition whitespace-nowrap">Product</a>
+          <a href="#why-cloud-net" class="hover:text-white transition whitespace-nowrap">Why Cloud Net?</a>
+          <a href="#self-healing" class="hover:text-pink-300 transition flex items-center space-x-1 whitespace-nowrap">
+            <i class="fa-solid fa-wand-magic-sparkles text-xs text-pink-400"></i>
+            <span>Self-Healing Engine</span>
+          </a>
+          <a href="#features" class="hover:text-white transition whitespace-nowrap">Features</a>
+          <a href="#integrations" class="hover:text-white transition whitespace-nowrap">Integrations</a>
+          <a href="#live-demo" class="hover:text-white transition whitespace-nowrap">Live Log Stream</a>
+        </nav>
+      </div>
+
+      <!-- Right CTAs (Single line, perfectly formatted) -->
+      <div class="flex items-center space-x-2.5 whitespace-nowrap shrink-0">
+        <!-- Direct Link to Live Console -->
+        <a href="/explorer" class="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-md bg-purple-900/80 hover:bg-purple-800 text-xs font-bold border border-purple-400/40 text-purple-100 shadow-sm transition whitespace-nowrap">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping mr-0.5"></span>
+          <span>Live Console</span>
+          <i class="fa-solid fa-arrow-up-right-from-square text-[10px] ml-1"></i>
+        </a>
+
+        <!-- Sign In -->
+        <button onclick="openAuthModal('signin')" class="hidden sm:inline-block text-xs font-semibold text-purple-200 hover:text-white px-2.5 py-1.5 transition whitespace-nowrap">
+          Log In
+        </button>
+
+        <!-- Get Started Free CTA -->
+        <button onclick="openAuthModal('signup')" class="px-3.5 py-1.5 rounded-md bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white text-xs font-bold uppercase tracking-wider shadow-md hover:shadow-lg transition transform hover:-translate-y-0.5 whitespace-nowrap">
+          Get Started Free
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- ========================================================================= -->
+  <!-- 2. HERO SECTION -->
+  <!-- ========================================================================= -->
+  <section id="product" class="hero-gradient text-white pt-14 pb-20 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+    <div class="absolute inset-0 bg-[radial-gradient(#ffffff15_1px,transparent_1px)] [background-size:24px_24px] pointer-events-none opacity-40"></div>
+
+    <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-10 items-center relative z-10">
+      
+      <!-- Left Column: Copy & Email Signup Form -->
+      <div class="lg:col-span-6 space-y-5">
+        <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-purple-900/70 border border-purple-400/30 text-purple-200 text-xs font-semibold">
+          <i class="fa-solid fa-wand-magic-sparkles text-pink-400"></i>
+          <span>HDFS Anomaly Detection & Autonomous Self-Healing</span>
+        </div>
+
+        <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight leading-tight text-white">
+          Accelerate Incident Investigations with Log Anomaly Detection
+        </h1>
+
+        <p class="text-base sm:text-lg text-purple-100/90 leading-relaxed font-normal">
+          Automatically alert on anomalous log patterns and dispatch autonomous self-healing remediations in sub-second intervals — without query languages or manual alert tuning.
+        </p>
+
+        <!-- Business Email Signup Form (Working) -->
+        <div class="pt-2">
+          <form id="hero-signup-form" class="flex flex-col sm:flex-row gap-2 max-w-lg" onsubmit="handleHeroSubmit(event)">
+            <input 
+              type="email" 
+              id="hero-email"
+              required 
+              placeholder="Enter your business email" 
+              class="flex-1 px-4 py-3 rounded-md bg-white text-slate-900 placeholder-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500 shadow-inner"
+            >
+            <button 
+              type="submit" 
+              class="px-6 py-3 rounded-md bg-pink-600 hover:bg-pink-700 text-white font-bold text-xs uppercase tracking-wider shadow-lg hover:shadow-pink-600/40 transition whitespace-nowrap"
+            >
+              Get Started Free
+            </button>
+          </form>
+          <p class="text-[11px] text-purple-200/80 mt-2 flex items-center">
+            <i class="fa-solid fa-check text-emerald-400 mr-1.5"></i> Free trial includes full platform access. No credit card required.
+          </p>
+        </div>
+
+        <!-- Proof Badges -->
+        <div class="pt-4 flex flex-wrap items-center gap-6 text-xs text-purple-200 border-t border-purple-800/60">
+          <div><strong class="text-white font-mono text-sm">6.8M+</strong> logs parsed/sec</div>
+          <div><strong class="text-white font-mono text-sm">&lt; 300 ms</strong> self-healing latency</div>
+          <div><strong class="text-white font-mono text-sm">7,500x</strong> MTTR speedup</div>
+        </div>
+      </div>
+
+      <!-- Right Column: Interactive Hero Dashboard Preview (NO overlapping boxes) -->
+      <div class="lg:col-span-6">
+        <div class="bg-white rounded-xl shadow-2xl border border-slate-200 overflow-hidden text-slate-800">
+          
+          <!-- Mockup Window Bar -->
+          <div class="bg-[#f8fafc] px-4 py-2.5 border-b border-slate-200 flex items-center justify-between text-xs">
+            <div class="flex items-center space-x-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-rose-400 inline-block"></span>
+              <span class="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block"></span>
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 inline-block"></span>
+              <span class="font-bold text-slate-700 ml-2">Insights — Live Stream</span>
+            </div>
+            <div class="flex items-center space-x-2">
+              <span class="px-2 py-0.5 rounded bg-purple-100 text-purple-800 font-mono text-[10px] font-bold">15m Window</span>
+              <a href="/explorer" class="text-purple-700 hover:text-purple-900 font-semibold text-xs flex items-center space-x-1">
+                <span>Open Full Console</span>
+                <i class="fa-solid fa-arrow-right text-[10px]"></i>
+              </a>
+            </div>
+          </div>
+
+          <!-- Hero Preview Body (Clean padding, proper margins, zero overlap) -->
+          <div class="p-5 space-y-4">
+            
+            <!-- Mini Timeline Histogram -->
+            <div class="bg-slate-50 p-3 rounded-lg border border-slate-200">
+              <div class="flex justify-between items-center text-[11px] font-mono text-slate-600 mb-2">
+                <span>Ingestion Rate (100k scale)</span>
+                <span class="text-rose-600 font-bold flex items-center">
+                  <span class="w-2 h-2 rounded-full bg-pink-500 mr-1.5 pulse-dot"></span>Active Anomaly Spike
+                </span>
+              </div>
+              
+              <!-- Stacked Bars with dedicated container -->
+              <div class="h-10 flex items-end justify-between space-x-1 border-b border-slate-200 pb-1">
+                <div class="flex-1 flex flex-col justify-end h-full"><div class="bg-sky-400 h-5 rounded-xs"></div></div>
+                <div class="flex-1 flex flex-col justify-end h-full"><div class="bg-sky-400 h-6 rounded-xs"></div></div>
+                <div class="flex-1 flex flex-col justify-end h-full"><div class="bg-sky-400 h-5 rounded-xs"></div></div>
+                <div class="flex-1 flex flex-col justify-end h-full">
+                  <div class="bg-pink-600 h-3 rounded-t-xs"></div>
+                  <div class="bg-sky-400 h-6 rounded-b-xs"></div>
+                </div>
+                <div class="flex-1 flex flex-col justify-end h-full">
+                  <div class="bg-pink-600 h-4 rounded-t-xs"></div>
+                  <div class="bg-sky-400 h-6 rounded-b-xs"></div>
+                </div>
+                <div class="flex-1 flex flex-col justify-end h-full"><div class="bg-sky-400 h-5 rounded-xs"></div></div>
+                <div class="flex-1 flex flex-col justify-end h-full"><div class="bg-sky-400 h-6 rounded-xs"></div></div>
+                <div class="flex-1 flex flex-col justify-end h-full"><div class="bg-sky-400 h-5 rounded-xs"></div></div>
+              </div>
+              <div class="flex justify-between text-[9px] font-mono text-slate-400 mt-1">
+                <span>13:11</span>
+                <span>13:14 (Anomaly)</span>
+                <span>13:17</span>
+                <span>13:20</span>
+              </div>
+            </div>
+
+            <!-- Outlier Card with clean row layout -->
+            <div class="p-3.5 rounded-lg border border-slate-200 bg-white shadow-xs space-y-2.5">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-2">
+                <div>
+                  <h4 class="font-bold text-xs text-slate-900">
+                    New error logs detected on <span class="text-indigo-600 font-semibold">service:email-api-py</span>
+                  </h4>
+                  <p class="text-[11px] text-slate-500">
+                    Anomalous logs surged to <strong class="text-rose-600">360 logs per minute</strong>.
+                  </p>
+                </div>
+                <div class="shrink-0 flex items-center space-x-1.5">
+                  <span class="bg-[#fde8ef] text-[#d61f59] border border-[#f8b4c8] font-bold px-1.5 py-0.5 rounded text-[10px] font-mono">ERROR</span>
+                  <span class="text-slate-500 font-mono text-[10px]">env:dev</span>
+                </div>
+              </div>
+
+              <!-- Pattern Box -->
+              <div class="bg-slate-50 p-2.5 rounded border border-slate-200 text-[11px] font-mono">
+                <div class="flex items-center justify-between text-[10px] text-slate-500 mb-1">
+                  <span class="text-pink-600 font-bold">≈ 107K volume</span>
+                  <span>··· 3.65K recent rate</span>
+                </div>
+                <div class="text-slate-800 break-all">
+                  XXX.XXX.XXX.XXX - - [23/Mar/2026 HH:mm:ss] "GET /_health HTTP/1.1" 200 -
+                </div>
+              </div>
+
+              <!-- Self-Healing Strip -->
+              <div class="p-2 bg-purple-50 rounded border border-purple-200 flex items-center justify-between text-[11px]">
+                <div class="flex items-center space-x-1.5">
+                  <i class="fa-solid fa-wand-magic-sparkles text-purple-700"></i>
+                  <span class="font-bold text-purple-900">Autonomous Remediation:</span>
+                  <span class="text-emerald-700 font-mono font-bold">CIRCUIT_BREAKER_RESET (320 ms)</span>
+                </div>
+                <span class="text-[10px] font-bold text-purple-800 bg-purple-200/60 px-1.5 py-0.5 rounded">7,500x Speedup</span>
+              </div>
+            </div>
+
+            <!-- Interactive Action Row -->
+            <div class="flex items-center justify-between pt-1">
+              <button onclick="triggerHeroIncident()" id="hero-incident-btn" class="px-3.5 py-1.5 rounded bg-purple-50 hover:bg-purple-100 text-purple-800 border border-purple-200 text-xs font-semibold transition flex items-center space-x-1.5">
+                <i class="fa-solid fa-bolt text-amber-500"></i>
+                <span>Inject Anomaly Live</span>
+              </button>
+              <a href="/explorer" class="px-4 py-1.5 rounded bg-purple-700 hover:bg-purple-800 text-white text-xs font-bold transition shadow-xs">
+                Launch Full Explorer →
+              </a>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ========================================================================= -->
+  <!-- 3. CORE AGENDA: AUTONOMOUS SELF-HEALING ENGINE (The User's Project Agenda!) -->
+  <!-- ========================================================================= -->
+  <section id="self-healing" class="py-16 bg-[#f8fafc] border-b border-[#e1e3e8]">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <!-- Section Header -->
+      <div class="text-center max-w-3xl mx-auto mb-12">
+        <span class="text-xs font-bold uppercase tracking-wider text-pink-700 bg-pink-50 px-3 py-1 rounded-full border border-pink-200">
+          Core Architecture
+        </span>
+        <h2 class="mt-3 text-3xl font-extrabold text-slate-900 tracking-tight">
+          Cloud Net Autonomous Self-Healing Infrastructure
+        </h2>
+        <p class="mt-2 text-slate-600 text-sm sm:text-base">
+          Deterministic closed-loop remediations triggered instantaneously upon anomaly detection. Replaces 35-minute manual triage with <strong>sub-second automated resolution</strong>.
+        </p>
+      </div>
+
+      <!-- =================================================================== -->
+      <!-- THE ANOMALY-TO-HEALING LIFECYCLE: BEFORE vs. DURING vs. AFTER       -->
+      <!-- =================================================================== -->
+      <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6 mb-12">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-200 pb-4 mb-6 gap-2">
+          <div>
+            <h3 class="text-base font-bold text-slate-900 flex items-center">
+              <i class="fa-solid fa-arrows-spin text-purple-700 mr-2"></i>
+              How Cloud Net Detects & Self-Heals Anomalies (Full Lifecycle)
+            </h3>
+            <p class="text-xs text-slate-500 mt-0.5">
+              Click any stage below to inspect the system telemetry before, during, and after autonomous remediation.
+            </p>
+          </div>
+          
+          <!-- Lifecycle Step Buttons -->
+          <div class="flex items-center space-x-1 bg-slate-100 p-1 rounded-lg text-xs" id="lifecycle-stepper-tabs">
+            <button onclick="setLifecycleStage(1)" id="lstep-btn-1" class="px-3 py-1 rounded font-bold bg-white text-rose-700 shadow-xs">
+              1. Anomaly Occurs
+            </button>
+            <button onclick="setLifecycleStage(2)" id="lstep-btn-2" class="px-3 py-1 rounded font-medium text-slate-600 hover:text-slate-900">
+              2. Self-Healing Dispatches
+            </button>
+            <button onclick="setLifecycleStage(3)" id="lstep-btn-3" class="px-3 py-1 rounded font-medium text-slate-600 hover:text-slate-900">
+              3. Fixed & Restored
+            </button>
+            <button onclick="playFullLifecycleDemo()" class="px-3 py-1 rounded font-bold bg-purple-700 hover:bg-purple-800 text-white ml-2 flex items-center space-x-1 shadow-xs">
+              <i class="fa-solid fa-play text-[9px]"></i>
+              <span>Play Full Flow</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Dynamic Lifecycle Stage Display -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6" id="lifecycle-cards-container">
+          
+          <!-- Stage 1 Card: The Problem (Needs Self-Healing) -->
+          <div id="lcard-1" class="p-4 rounded-xl border-2 border-rose-400 bg-rose-50/40 shadow-xs space-y-3 transition">
+            <div class="flex items-center justify-between">
+              <span class="px-2 py-0.5 rounded bg-rose-100 text-rose-800 font-bold font-mono text-[10px] uppercase">
+                STAGE 1: ANOMALY SURGE
+              </span>
+              <span class="w-2.5 h-2.5 rounded-full bg-rose-600 animate-ping"></span>
+            </div>
+            <div>
+              <h4 class="font-bold text-xs text-slate-900">System Needs Self-Healing</h4>
+              <p class="text-[11px] text-slate-600 mt-1 leading-relaxed">
+                Log frequency spikes to <strong>3,800 errors/min</strong> on <span class="font-mono text-indigo-700">auth-dotnet</span>. VolumeMap pointer corruption causes orphan blocks.
+              </p>
+            </div>
+            <div class="p-2 bg-white rounded border border-rose-200 font-mono text-[10px] text-rose-700">
+              [CRITICAL ALERT] Status: DEGRADED<br>
+              writeBlock exception java.io.IOException: BlockInfo not found in volumeMap (E35)
+            </div>
+            <div class="text-[11px] font-semibold text-rose-700 flex items-center">
+              <i class="fa-solid fa-triangle-exclamation mr-1.5"></i> Manual SLA Breach Risk: 35 min downtime
+            </div>
+          </div>
+
+          <!-- Stage 2 Card: The Remediation (Self-Healing in Action) -->
+          <div id="lcard-2" class="p-4 rounded-xl border border-slate-200 bg-slate-50 opacity-60 shadow-xs space-y-3 transition">
+            <div class="flex items-center justify-between">
+              <span class="px-2 py-0.5 rounded bg-purple-100 text-purple-800 font-bold font-mono text-[10px] uppercase">
+                STAGE 2: CLOSED-LOOP INTERVENTION
+              </span>
+              <i class="fa-solid fa-gear text-purple-600"></i>
+            </div>
+            <div>
+              <h4 class="font-bold text-xs text-slate-900">Autonomous Agent Intervenes</h4>
+              <p class="text-[11px] text-slate-600 mt-1 leading-relaxed">
+                Cloud Net ML classifier matches signature against remediation action catalog and executes automated resolution.
+              </p>
+            </div>
+            <div class="p-2 bg-white rounded border border-purple-200 font-mono text-[10px] text-purple-900">
+              [ACTION DISPATCHED] FSCK_METADATA_RESYNC<br>
+              Re-indexing DataNode volumeMap & purging unreferenced invalidSet pointers...
+            </div>
+            <div class="text-[11px] font-semibold text-purple-700 flex items-center">
+              <i class="fa-solid fa-wand-magic-sparkles mr-1.5"></i> Intercepted in &lt; 45 ms without human alert
+            </div>
+          </div>
+
+          <!-- Stage 3 Card: The Fix (System Restored) -->
+          <div id="lcard-3" class="p-4 rounded-xl border border-slate-200 bg-slate-50 opacity-60 shadow-xs space-y-3 transition">
+            <div class="flex items-center justify-between">
+              <span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold font-mono text-[10px] uppercase">
+                STAGE 3: HEALTH RESTORED
+              </span>
+              <i class="fa-solid fa-circle-check text-emerald-600"></i>
+            </div>
+            <div>
+              <h4 class="font-bold text-xs text-slate-900">Self-Healing Fix Verified</h4>
+              <p class="text-[11px] text-slate-600 mt-1 leading-relaxed">
+                Error rate drops to <strong>0 logs/min</strong>. Post-verification test confirms 0 orphan blocks.
+              </p>
+            </div>
+            <div class="p-2 bg-white rounded border border-emerald-200 font-mono text-[10px] text-emerald-800">
+              [HEALTH CONFIRMED] VolumeMap status: 100% OK<br>
+              Completed in 280 ms (replaces 35 min manual triage)
+            </div>
+            <div class="text-[11px] font-bold text-emerald-700 flex items-center">
+              <i class="fa-solid fa-bolt mr-1.5"></i> 7,500x MTTR Speedup Achieved
+            </div>
+          </div>
+
+        </div>
+      </div>
+      <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden mb-12">
+        <div class="p-4 bg-slate-50 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div class="flex items-center space-x-2">
+            <i class="fa-solid fa-shield-halved text-purple-700"></i>
+            <span class="font-bold text-xs uppercase tracking-wide text-slate-800">
+              Evaluated Benchmark: Manual Triage vs. Cloud Net Closed-Loop Recovery
+            </span>
+          </div>
+          <span class="text-[11px] font-mono text-emerald-700 font-bold bg-emerald-50 px-2.5 py-0.5 rounded border border-emerald-200">
+            Average Speedup: 5,600x Faster MTTR
+          </span>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs border-collapse">
+            <thead class="bg-[#f8fafc] text-slate-600 border-b border-slate-200 font-semibold">
+              <tr>
+                <th class="py-3 px-4">INCIDENT SIGNATURE (RCA)</th>
+                <th class="py-3 px-4">TARGET SUBSYSTEM</th>
+                <th class="py-3 px-4">AUTOMATED REMEDIATION ACTION</th>
+                <th class="py-3 px-4">MANUAL TRIAGE</th>
+                <th class="py-3 px-4">AUTO LATENCY</th>
+                <th class="py-3 px-4">SPEEDUP</th>
+                <th class="py-3 px-4">SUCCESS RATE</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 font-mono text-[11px]">
+              <tr class="hover:bg-purple-50/40 transition">
+                <td class="py-3 px-4 font-bold text-slate-800">Metadata Desync (E35)</td>
+                <td class="py-3 px-4 text-slate-600">DataNode VolumeMap</td>
+                <td class="py-3 px-4 text-purple-700 font-semibold">FSCK_METADATA_RESYNC_AND_ORPHAN_PURGE</td>
+                <td class="py-3 px-4 text-slate-500">35 min</td>
+                <td class="py-3 px-4 text-emerald-700 font-bold">280 ms</td>
+                <td class="py-3 px-4 font-bold text-purple-800">7,500x</td>
+                <td class="py-3 px-4 text-emerald-600 font-bold">99.2%</td>
+              </tr>
+              <tr class="hover:bg-purple-50/40 transition">
+                <td class="py-3 px-4 font-bold text-slate-800">Socket I/O Timeout (E16)</td>
+                <td class="py-3 px-4 text-slate-600">DataXceiver Socket</td>
+                <td class="py-3 px-4 text-purple-700 font-semibold">CIRCUIT_BREAKER_RESET_AND_PIPELINE_FAILOVER</td>
+                <td class="py-3 px-4 text-slate-500">40 min</td>
+                <td class="py-3 px-4 text-emerald-700 font-bold">320 ms</td>
+                <td class="py-3 px-4 font-bold text-purple-800">7,500x</td>
+                <td class="py-3 px-4 text-emerald-600 font-bold">98.5%</td>
+              </tr>
+              <tr class="hover:bg-purple-50/40 transition">
+                <td class="py-3 px-4 font-bold text-slate-800">Under-Replication (E46)</td>
+                <td class="py-3 px-4 text-slate-600">NameSystem Replicas</td>
+                <td class="py-3 px-4 text-purple-700 font-semibold">DYNAMIC_FORCE_RE_REPLICATION</td>
+                <td class="py-3 px-4 text-slate-500">30 min</td>
+                <td class="py-3 px-4 text-emerald-700 font-bold">350 ms</td>
+                <td class="py-3 px-4 font-bold text-purple-800">5,142x</td>
+                <td class="py-3 px-4 text-emerald-600 font-bold">98.8%</td>
+              </tr>
+              <tr class="hover:bg-purple-50/40 transition">
+                <td class="py-3 px-4 font-bold text-slate-800">Thread Contention (E9)</td>
+                <td class="py-3 px-4 text-slate-600">DataXceiver Pool</td>
+                <td class="py-3 px-4 text-purple-700 font-semibold">RECYCLE_DATAXCEIVER_WORKERS</td>
+                <td class="py-3 px-4 text-slate-500">20 min</td>
+                <td class="py-3 px-4 text-emerald-700 font-bold">310 ms</td>
+                <td class="py-3 px-4 font-bold text-purple-800">3,870x</td>
+                <td class="py-3 px-4 text-emerald-600 font-bold">99.1%</td>
+              </tr>
+              <tr class="hover:bg-purple-50/40 transition">
+                <td class="py-3 px-4 font-bold text-slate-800">Client Abort Lease (E18)</td>
+                <td class="py-3 px-4 text-slate-600">LeaseManager</td>
+                <td class="py-3 px-4 text-purple-700 font-semibold">LEASE_RECOVERY_AND_PARTIAL_BLOCK_COMMIT</td>
+                <td class="py-3 px-4 text-slate-500">15 min</td>
+                <td class="py-3 px-4 text-emerald-700 font-bold">220 ms</td>
+                <td class="py-3 px-4 font-bold text-purple-800">4,090x</td>
+                <td class="py-3 px-4 text-emerald-600 font-bold">99.4%</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- INTERACTIVE INCIDENT & SELF-HEALING LIVE TERMINAL -->
+      <div class="bg-white rounded-xl border border-slate-200 shadow-md p-6 space-y-6">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 pb-4">
+          <div>
+            <h3 class="text-base font-bold text-slate-900 flex items-center">
+              <i class="fa-solid fa-terminal text-purple-700 mr-2"></i>
+              Interactive Self-Healing Simulator (Live Test)
+            </h3>
+            <p class="text-xs text-slate-500 mt-0.5">
+              Select a fault pattern below and click run to watch the closed-loop recovery sequence execute live.
+            </p>
+          </div>
+
+          <!-- Fault Selection Pills -->
+          <div class="flex flex-wrap items-center gap-1.5" id="sim-fault-buttons">
+            <button onclick="selectFault('Metadata desync', this)" class="fault-btn px-2.5 py-1 rounded text-xs font-semibold border border-purple-600 bg-purple-50 text-purple-800">
+              Metadata Desync (E35)
+            </button>
+            <button onclick="selectFault('Network I/O', this)" class="fault-btn px-2.5 py-1 rounded text-xs font-normal border border-slate-200 text-slate-600 hover:bg-slate-100">
+              Socket I/O (E16)
+            </button>
+            <button onclick="selectFault('Under-replication', this)" class="fault-btn px-2.5 py-1 rounded text-xs font-normal border border-slate-200 text-slate-600 hover:bg-slate-100">
+              Under-replication (E46)
+            </button>
+            <button onclick="selectFault('Thread contention', this)" class="fault-btn px-2.5 py-1 rounded text-xs font-normal border border-slate-200 text-slate-600 hover:bg-slate-100">
+              Worker Deadlock (E9)
+            </button>
+          </div>
+        </div>
+
+        <!-- Terminal Output Screen -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+          
+          <!-- Terminal Window -->
+          <div class="lg:col-span-8 terminal-window overflow-hidden">
+            <div class="terminal-header text-slate-400 text-xs">
+              <div class="flex items-center space-x-1.5">
+                <span class="w-2.5 h-2.5 rounded-full bg-rose-500 inline-block"></span>
+                <span class="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block"></span>
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block"></span>
+                <span class="ml-2 font-mono text-slate-300">cloud-net-engine:~/self-healing-agent$</span>
+              </div>
+              <span id="sim-status-badge" class="px-2 py-0.5 rounded text-[10px] font-mono bg-emerald-950 text-emerald-400 border border-emerald-800">
+                SYSTEM NOMINAL
+              </span>
+            </div>
+
+            <div class="terminal-body space-y-2 min-h-[190px]" id="terminal-output">
+              <div class="text-slate-500">[13:14:01.000] Ingesting telemetry at 6,821,395 logs/sec across 6 services...</div>
+              <div class="text-slate-500">[13:14:01.200] Insights baseline established. Click "Run Live Autonomous Remediation" to trigger fault.</div>
+            </div>
+          </div>
+
+          <!-- Live Remediation Control Panel -->
+          <div class="lg:col-span-4 space-y-4">
+            <div class="p-4 rounded-lg bg-slate-50 border border-slate-200 space-y-3 text-xs">
+              <div class="font-bold text-slate-800 flex items-center justify-between">
+                <span>Selected Target:</span>
+                <span class="font-mono text-indigo-700" id="sim-target-label">auth-dotnet (Metadata)</span>
+              </div>
+
+              <div class="space-y-1">
+                <span class="text-slate-500 text-[11px]">Remediation Action:</span>
+                <div class="font-mono text-purple-900 font-bold text-[11px]" id="sim-action-label">
+                  FSCK_METADATA_RESYNC
+                </div>
+              </div>
+
+              <div class="space-y-1">
+                <span class="text-slate-500 text-[11px]">Expected Latency:</span>
+                <div class="font-mono text-emerald-700 font-bold text-sm" id="sim-latency-label">
+                  280 ms (vs 35 min manual)
+                </div>
+              </div>
+
+              <button onclick="runInteractiveSimulator()" id="sim-run-btn" class="w-full py-2.5 rounded-md bg-purple-700 hover:bg-purple-800 text-white font-bold text-xs uppercase tracking-wider shadow-md transition flex items-center justify-center space-x-2">
+                <i class="fa-solid fa-play text-[10px]"></i>
+                <span>Run Live Autonomous Remediation</span>
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ========================================================================= -->
+  <!-- 4. "WHY CLOUD NET?" SECTION (Clean Grid, No Overlapping Boxes) -->
+  <!-- ========================================================================= -->
+  <section id="why-cloud-net" class="py-16 bg-white border-b border-[#e1e3e8]">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="text-center max-w-3xl mx-auto mb-12">
+        <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+          Why Cloud Net?
+        </h2>
+        <p class="mt-2 text-slate-600 text-sm sm:text-base">
+          Built for high-velocity engineering organizations requiring automated incident response without manual alert threshold tuning.
+        </p>
+      </div>
+
+      <!-- 4 Pillars Grid (Proper gap, clean padding, zero overlap) -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        
+        <!-- Pillar 1 -->
+        <div class="bg-white p-6 rounded-lg border border-slate-200 shadow-xs hover:border-purple-300 hover:shadow-md transition">
+          <div class="w-10 h-10 rounded-lg bg-purple-50 text-purple-700 flex items-center justify-center text-lg mb-4">
+            <i class="fa-solid fa-magnifying-glass-chart"></i>
+          </div>
+          <h3 class="text-base font-bold text-slate-900 mb-2">
+            No Custom Query Language Required
+          </h3>
+          <p class="text-xs text-slate-600 leading-relaxed">
+            Leverage unified tagging to filter and search anything easily — no training needed. Anyone can drill into log anomalies instantly.
+          </p>
+        </div>
+
+        <!-- Pillar 2 -->
+        <div class="bg-white p-6 rounded-lg border border-slate-200 shadow-xs hover:border-purple-300 hover:shadow-md transition">
+          <div class="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center text-lg mb-4">
+            <i class="fa-solid fa-gauge-high"></i>
+          </div>
+          <h3 class="text-base font-bold text-slate-900 mb-2">
+            Enterprise Scale & Reliability
+          </h3>
+          <p class="text-xs text-slate-600 leading-relaxed">
+            Whatever your scale or use cases, take advantage of our platform prepared to handle more than 10 billion events per day with zero ingestion lag.
+          </p>
+        </div>
+
+        <!-- Pillar 3 -->
+        <div class="bg-white p-6 rounded-lg border border-slate-200 shadow-xs hover:border-purple-300 hover:shadow-md transition">
+          <div class="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg mb-4">
+            <i class="fa-solid fa-cubes"></i>
+          </div>
+          <h3 class="text-base font-bold text-slate-900 mb-2">
+            1,000+ Vendor-Backed Integrations
+          </h3>
+          <p class="text-xs text-slate-600 leading-relaxed">
+            Cloud Net offers wide coverage across any technology, with support and log processing templates provided by default out of the box.
+          </p>
+        </div>
+
+        <!-- Pillar 4 -->
+        <div class="bg-white p-6 rounded-lg border border-slate-200 shadow-xs hover:border-purple-300 hover:shadow-md transition">
+          <div class="w-10 h-10 rounded-lg bg-pink-50 text-pink-600 flex items-center justify-center text-lg mb-4">
+            <i class="fa-solid fa-database"></i>
+          </div>
+          <h3 class="text-base font-bold text-slate-900 mb-2">
+            Logging Without Limits™
+          </h3>
+          <p class="text-xs text-slate-600 leading-relaxed">
+            Decouple log ingestion from indexing to dynamically manage storage costs while querying live streams without delays or lag.
+          </p>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ========================================================================= -->
+  <!-- 5. 1,000+ BUILT-IN INTEGRATIONS (Exact strip from screenshot) -->
+  <!-- ========================================================================= -->
+  <section id="integrations" class="py-10 bg-white border-b border-[#e1e3e8]">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h3 class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-6">
+        1,000+ Turn-Key Integrations, Including
+      </h3>
+      <div class="flex flex-wrap items-center justify-center gap-8 md:gap-14 text-slate-500">
+        <div class="flex items-center space-x-2 font-bold text-slate-700 text-sm">
+          <i class="fa-brands fa-java text-xl text-red-600"></i>
+          <span>Java</span>
+        </div>
+        <div class="flex items-center space-x-2 font-bold text-slate-700 text-sm">
+          <i class="fa-solid fa-server text-xl text-emerald-600"></i>
+          <span>NGINX</span>
+        </div>
+        <div class="flex items-center space-x-2 font-bold text-slate-700 text-sm">
+          <i class="fa-brands fa-python text-xl text-blue-500"></i>
+          <span>Python</span>
+        </div>
+        <div class="flex items-center space-x-2 font-bold text-slate-700 text-sm">
+          <i class="fa-solid fa-dharmachakra text-xl text-indigo-600"></i>
+          <span>Kubernetes</span>
+        </div>
+        <div class="flex items-center space-x-2 font-bold text-slate-700 text-sm">
+          <i class="fa-brands fa-docker text-xl text-blue-600"></i>
+          <span>Docker</span>
+        </div>
+        <div class="flex items-center space-x-2 font-bold text-slate-700 text-sm">
+          <i class="fa-brands fa-aws text-xl text-amber-500"></i>
+          <span>AWS</span>
+        </div>
+        <div class="flex items-center space-x-2 font-bold text-slate-700 text-sm">
+          <i class="fa-brands fa-google text-xl text-blue-600"></i>
+          <span>Google Cloud</span>
+        </div>
+        <div class="flex items-center space-x-2 font-bold text-slate-700 text-sm">
+          <i class="fa-solid fa-leaf text-xl text-emerald-500"></i>
+          <span>MongoDB</span>
+        </div>
+        <div class="flex items-center space-x-2 font-bold text-slate-700 text-sm">
+          <i class="fa-solid fa-bolt text-xl text-orange-500"></i>
+          <span>Apache Spark</span>
+        </div>
+        <div class="flex items-center space-x-2 font-bold text-slate-700 text-sm">
+          <i class="fa-solid fa-cubes-stacked text-xl text-yellow-500"></i>
+          <span>Hadoop HDFS</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================================= -->
+  <!-- 6. INTERACTIVE PRODUCT FEATURES (Tabs Switcher matching Video!) -->
+  <!-- ========================================================================= -->
+  <section id="features" class="py-16 bg-white border-b border-[#e1e3e8]">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="text-center max-w-3xl mx-auto mb-10">
+        <span class="text-xs font-bold uppercase tracking-wider text-purple-700 bg-purple-50 px-3 py-1 rounded-full border border-purple-200">
+          Product Capabilities
+        </span>
+        <h2 class="mt-3 text-3xl font-extrabold text-slate-900 tracking-tight">
+          Interactive Full-Stack Observability Tour
+        </h2>
+        <p class="mt-2 text-slate-600 text-sm">
+          Click between the feature tabs below to explore each capability interactively.
+        </p>
+      </div>
+
+      <!-- Feature Tabs Navigation (Interactive) -->
+      <div class="flex flex-wrap items-center justify-center border-b border-slate-200 mb-10 gap-2">
+        <button onclick="switchFeatureTab('anomaly', this)" class="feature-tab-btn active-tab px-4 py-2.5 text-xs font-bold text-purple-800 flex items-center space-x-2">
+          <i class="fa-solid fa-chart-line text-purple-600"></i>
+          <span>Performance Anomalies</span>
+        </button>
+        <button onclick="switchFeatureTab('storage', this)" class="feature-tab-btn px-4 py-2.5 text-xs font-semibold text-slate-600 hover:text-purple-700 flex items-center space-x-2">
+          <i class="fa-solid fa-database text-blue-500"></i>
+          <span>Tiered Flex Storage & ROI</span>
+        </button>
+        <button onclick="switchFeatureTab('context', this)" class="feature-tab-btn px-4 py-2.5 text-xs font-semibold text-slate-600 hover:text-purple-700 flex items-center space-x-2">
+          <i class="fa-solid fa-diagram-project text-indigo-500"></i>
+          <span>Contextual Insights</span>
+        </button>
+        <button onclick="switchFeatureTab('ux', this)" class="feature-tab-btn px-4 py-2.5 text-xs font-semibold text-slate-600 hover:text-purple-700 flex items-center space-x-2">
+          <i class="fa-solid fa-user-check text-emerald-500"></i>
+          <span>UX Impact & Waterfall</span>
+        </button>
+        <button onclick="switchFeatureTab('watchdog', this)" class="feature-tab-btn px-4 py-2.5 text-xs font-semibold text-slate-600 hover:text-purple-700 flex items-center space-x-2">
+          <i class="fa-solid fa-bolt text-pink-500"></i>
+          <span>AI Insights Engine</span>
+        </button>
+      </div>
+
+      <!-- Tab Content Area -->
+      <div id="feature-tab-content" class="min-h-[380px]">
+        
+        <!-- TAB 1: Automatically Detect Performance Anomalies -->
+        <div id="tab-pane-anomaly" class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center animate-fadeIn">
+          <div class="lg:col-span-7">
+            <div class="p-6 rounded-xl border border-slate-200 bg-[#f8fafc] shadow-md space-y-4">
+              <div class="flex items-center justify-between border-b border-slate-200 pb-3">
+                <span class="font-bold text-xs text-slate-700 uppercase tracking-wider flex items-center">
+                  <i class="fa-solid fa-chart-line text-purple-700 mr-2"></i> Log Anomaly Detection Engine
+                </span>
+                <span class="px-2 py-0.5 rounded bg-rose-100 text-rose-700 font-mono text-[10px] font-bold">1 Outlier Detected</span>
+              </div>
+
+              <!-- Outlier Card Display with clean layout -->
+              <div class="bg-white p-4 rounded-lg border border-slate-200 shadow-xs space-y-3">
+                <div class="space-y-1">
+                  <h4 class="font-bold text-sm text-slate-900">
+                    A spike in error logs was detected on <span class="text-indigo-600 font-semibold">service:auth-dotnet</span>
+                  </h4>
+                  <p class="text-xs text-slate-500">
+                    The anomalous logs increased to a rate of <strong class="text-rose-600">3.8K logs per minute</strong>.
+                  </p>
+                  <div class="flex items-center space-x-2 pt-1">
+                    <span class="bg-[#fde8ef] text-[#d61f59] border border-[#f8b4c8] font-bold px-1.5 py-0.5 rounded text-[10px] font-mono">ERROR</span>
+                    <span class="text-slate-500 font-mono text-[11px]">source:auth-dotnet-internal</span>
+                    <span class="text-slate-500 font-mono text-[11px]">env:staging</span>
+                  </div>
+                </div>
+
+                <!-- Rate Trend box -->
+                <div class="p-2 bg-slate-50 border border-slate-100 rounded flex items-center justify-between">
+                  <span class="text-[10px] font-mono text-slate-500 font-bold">Rate Trend (auth-dotnet)</span>
+                  <div class="w-36 h-6">
+                    <svg class="w-full h-6" viewBox="0 0 100 24">
+                      <path d="M 0,20 Q 30,19 60,15 T 85,3 T 100,5" fill="none" stroke="#ea3875" stroke-width="2" />
+                      <circle cx="85" cy="3" r="2.5" fill="#ea3875" />
+                    </svg>
+                  </div>
+                </div>
+
+                <!-- Pattern box -->
+                <div class="bg-slate-50 p-2.5 rounded border border-slate-200 font-mono text-[11px] text-slate-700">
+                  <div class="text-[10px] text-slate-400 mb-0.5">Top Pattern contributing to anomaly:</div>
+                  <div class="text-slate-800">Unexpected error deleting block: BlockInfo not found in volumeMap (E35)</div>
+                </div>
+
+                <!-- Self Healing Action -->
+                <div class="p-2.5 rounded bg-emerald-50 border border-emerald-200 text-[11px] text-emerald-800 flex items-center justify-between">
+                  <span>⚡ Autonomous Remediation: FSCK VolumeMap resync completed in 280 ms.</span>
+                  <span class="font-bold text-emerald-900 font-mono">7,500x speedup</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="lg:col-span-5 space-y-4">
+            <h3 class="text-2xl font-bold text-slate-900 tracking-tight">
+              Automatically Detect Performance Anomalies
+            </h3>
+            <ul class="space-y-3 text-sm text-slate-600">
+              <li class="flex items-start">
+                <i class="fa-solid fa-circle-check text-purple-600 text-sm mt-1 mr-3 shrink-0"></i>
+                <span>Automatically surface anomalies across all of your ingested logs by detecting when a status level sees a substantial increase relative to historical baselines.</span>
+              </li>
+              <li class="flex items-start">
+                <i class="fa-solid fa-circle-check text-purple-600 text-sm mt-1 mr-3 shrink-0"></i>
+                <span>Identify spikes and drops in critical health indicators with context-rich alerts that don't require any configuration or setup.</span>
+              </li>
+              <li class="flex items-start">
+                <i class="fa-solid fa-circle-check text-purple-600 text-sm mt-1 mr-3 shrink-0"></i>
+                <span>Surface concerning patterns and outliers across high-volume log data before end users are impacted.</span>
+              </li>
+            </ul>
+            <div class="pt-2">
+              <a href="/explorer" class="inline-flex items-center space-x-2 text-sm font-bold text-purple-700 hover:text-purple-900">
+                <span>Explore live anomaly detection in console</span>
+                <i class="fa-solid fa-arrow-right text-xs"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 2: Efficiently Store & Analyze High Volume Logs (With Interactive ROI Slider) -->
+        <div id="tab-pane-storage" class="hidden grid-cols-1 lg:grid-cols-12 gap-10 items-center animate-fadeIn">
+          <div class="lg:col-span-5 space-y-4">
+            <h3 class="text-2xl font-bold text-slate-900 tracking-tight">
+              Efficiently Store & Analyze High Volume Logs
+            </h3>
+            <ul class="space-y-3 text-sm text-slate-600">
+              <li class="flex items-start">
+                <i class="fa-solid fa-circle-check text-purple-600 text-sm mt-1 mr-3 shrink-0"></i>
+                <span>Store real-time application logs in Standard Tier and high-volume security, network, and operational logs in Flex Tier.</span>
+              </li>
+              <li class="flex items-start">
+                <i class="fa-solid fa-circle-check text-purple-600 text-sm mt-1 mr-3 shrink-0"></i>
+                <span>Utilize Flex Logs to adjust your retention and querying capacity independently, fulfilling even more use cases than with standard retention.</span>
+              </li>
+              <li class="flex items-start">
+                <i class="fa-solid fa-circle-check text-purple-600 text-sm mt-1 mr-3 shrink-0"></i>
+                <span>Explore all log types seamlessly with zero rehydration delays.</span>
+              </li>
+            </ul>
+          </div>
+
+          <!-- Interactive Storage Calculator (Left) -->
+          <div class="lg:col-span-7">
+            <div class="p-6 rounded-xl border border-slate-200 bg-[#f8fafc] shadow-md space-y-5">
+              <div class="flex items-center justify-between border-b border-slate-200 pb-2 text-xs">
+                <span class="font-bold text-slate-700">Interactive Tiered Storage Cost Simulator</span>
+                <span class="text-purple-700 font-bold">Flex Tier Architecture</span>
+              </div>
+
+              <!-- Range Slider -->
+              <div class="space-y-2 bg-white p-4 rounded-lg border border-slate-200">
+                <div class="flex justify-between text-xs font-semibold text-slate-700">
+                  <span>Daily Log Volume:</span>
+                  <span class="font-mono text-purple-700 font-bold" id="slider-vol-label">500 GB / day</span>
+                </div>
+                <input type="range" id="vol-range" min="50" max="5000" step="50" value="500" oninput="updateStorageCalc(this.value)">
+                <div class="flex justify-between text-[10px] text-slate-400 font-mono">
+                  <span>50 GB</span>
+                  <span>1 TB</span>
+                  <span>5 TB</span>
+                </div>
+              </div>
+
+              <!-- Calculated Savings Grid -->
+              <div class="grid grid-cols-2 gap-3 text-xs">
+                <div class="bg-white p-3 rounded-lg border border-slate-200">
+                  <span class="text-slate-500 text-[11px]">Standard Ingestion Cost:</span>
+                  <div class="text-base font-bold font-mono text-slate-800 mt-1" id="calc-std-cost">$1,500 / mo</div>
+                </div>
+
+                <div class="bg-purple-50 p-3 rounded-lg border border-purple-200">
+                  <span class="text-purple-700 font-bold text-[11px]">Cloud Net Flex Tier:</span>
+                  <div class="text-base font-bold font-mono text-emerald-700 mt-1" id="calc-flex-cost">$720 / mo</div>
+                </div>
+              </div>
+
+              <div class="p-3 bg-emerald-50 rounded border border-emerald-200 text-emerald-900 text-xs flex items-center justify-between font-mono">
+                <span>Estimated Monthly Savings:</span>
+                <span class="font-bold text-emerald-800 text-sm" id="calc-savings">$780 saved (52%)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 3: Contextual Insights -->
+        <div id="tab-pane-context" class="hidden grid-cols-1 lg:grid-cols-12 gap-10 items-center animate-fadeIn">
+          <div class="lg:col-span-7">
+            <div class="p-6 rounded-xl border border-slate-200 bg-[#f8fafc] shadow-md space-y-3">
+              <div class="flex items-center justify-between border-b border-slate-200 pb-2 text-xs">
+                <span class="font-bold text-slate-700">Contextual Telemetry Correlation</span>
+                <span class="bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded font-mono text-[10px] font-bold">Logs + Traces + Metrics</span>
+              </div>
+
+              <div class="space-y-2 text-xs font-mono">
+                <div class="p-3 bg-white rounded border-l-4 border-l-rose-500 border border-slate-200 flex items-center justify-between">
+                  <div>
+                    <span class="text-rose-600 font-bold">BlockInfoNotFound (E35)</span>
+                    <span class="text-slate-400">→ trace:9f8e4a1b</span>
+                    <div class="text-[11px] text-slate-600 mt-0.5">Metadata desync flagged on auth-dotnet (VolumeMap inconsistency)</div>
+                  </div>
+                  <span class="px-2 py-0.5 bg-purple-50 text-purple-700 rounded text-[10px] font-bold">Auto-Healed</span>
+                </div>
+
+                <div class="p-3 bg-white rounded border-l-4 border-l-amber-500 border border-slate-200 flex items-center justify-between">
+                  <div>
+                    <span class="text-amber-600 font-bold">SocketTimeoutException (E16)</span>
+                    <span class="text-slate-400">→ trace:7c2b3d8f</span>
+                    <div class="text-[11px] text-slate-600 mt-0.5">writeBlock failure on email-api-py: client pipeline failover executed</div>
+                  </div>
+                  <span class="px-2 py-0.5 bg-purple-50 text-purple-700 rounded text-[10px] font-bold">Auto-Healed</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="lg:col-span-5 space-y-4">
+            <h3 class="text-2xl font-bold text-slate-900 tracking-tight">
+              Augment Troubleshooting Workflow with Contextual Insights
+            </h3>
+            <ul class="space-y-3 text-sm text-slate-600">
+              <li class="flex items-start">
+                <i class="fa-solid fa-circle-check text-purple-600 text-sm mt-1 mr-3 shrink-0"></i>
+                <span>Accelerate issue remediation with out-of-the-box, tag-based insights that are surfaced at query time and become more sophisticated as your data set grows.</span>
+              </li>
+              <li class="flex items-start">
+                <i class="fa-solid fa-circle-check text-purple-600 text-sm mt-1 mr-3 shrink-0"></i>
+                <span>Resolve issues faster by automatically identifying the exact components in your system associated with disproportionate errors.</span>
+              </li>
+            </ul>
+            <div class="pt-2">
+              <button onclick="openAuthModal('signup')" class="px-5 py-2.5 rounded-md bg-purple-700 hover:bg-purple-800 text-white font-bold text-xs uppercase tracking-wider shadow-sm transition">
+                Get Started Free
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 4: Minimize Impact of UX Issues -->
+        <div id="tab-pane-ux" class="hidden grid-cols-1 lg:grid-cols-12 gap-10 items-center animate-fadeIn">
+          <div class="lg:col-span-5 space-y-4">
+            <h3 class="text-2xl font-bold text-slate-900 tracking-tight">
+              Minimize the Impact of UX Issues
+            </h3>
+            <ul class="space-y-3 text-sm text-slate-600">
+              <li class="flex items-start">
+                <i class="fa-solid fa-circle-check text-purple-600 text-sm mt-1 mr-3 shrink-0"></i>
+                <span>Identify the exact users who are experiencing an error in order to quickly assess its scope.</span>
+              </li>
+              <li class="flex items-start">
+                <i class="fa-solid fa-circle-check text-purple-600 text-sm mt-1 mr-3 shrink-0"></i>
+                <span>Easily prioritize your remediation efforts with automated insight into an issue's impact on frontend views and backend services.</span>
+              </li>
+            </ul>
+          </div>
+
+          <div class="lg:col-span-7">
+            <div class="p-6 rounded-xl border border-slate-200 bg-[#f8fafc] shadow-md space-y-3">
+              <div class="flex items-center justify-between border-b border-slate-200 pb-2 text-xs">
+                <span class="font-bold text-slate-700">End-to-End User Journey Waterfall</span>
+                <span class="text-emerald-700 font-bold">100% Request Availability</span>
+              </div>
+
+              <div class="space-y-3 text-xs">
+                <div>
+                  <div class="flex justify-between text-[11px] font-mono text-slate-600 mb-1">
+                    <span>GET /api/checkout (Frontend Web Store)</span>
+                    <span class="font-bold">42 ms</span>
+                  </div>
+                  <div class="h-3 bg-purple-200 rounded overflow-hidden">
+                    <div class="h-full bg-purple-600 w-full"></div>
+                  </div>
+                </div>
+
+                <div>
+                  <div class="flex justify-between text-[11px] font-mono text-slate-600 mb-1">
+                    <span>POST /auth/token (auth-dotnet)</span>
+                    <span class="font-bold text-emerald-700">12 ms (Self-Healed)</span>
+                  </div>
+                  <div class="h-3 bg-indigo-100 rounded overflow-hidden">
+                    <div class="h-full bg-indigo-600 w-3/4"></div>
+                  </div>
+                </div>
+
+                <div>
+                  <div class="flex justify-between text-[11px] font-mono text-slate-600 mb-1">
+                    <span>HDFS Block Replication (DataNode 03)</span>
+                    <span class="font-bold text-emerald-700">8 ms</span>
+                  </div>
+                  <div class="h-3 bg-sky-100 rounded overflow-hidden">
+                    <div class="h-full bg-sky-500 w-1/2"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 5: Enhance Observability with Insights by Your Side -->
+        <div id="tab-pane-watchdog" class="hidden grid-cols-1 lg:grid-cols-12 gap-10 items-center animate-fadeIn">
+          <div class="lg:col-span-7">
+            <div class="p-6 rounded-xl border border-purple-200 bg-purple-50/50 shadow-md space-y-4">
+              <div class="flex items-center justify-between border-b border-purple-200 pb-2 text-xs">
+                <span class="font-bold text-purple-900 flex items-center">
+                  <i class="fa-solid fa-bolt mr-1.5 text-purple-700"></i> Cloud Net AI Insights Engine Status
+                </span>
+                <span class="px-2 py-0.5 rounded bg-purple-200 text-purple-900 font-mono text-[10px] font-bold">Surveillance Active</span>
+              </div>
+
+              <div class="grid grid-cols-2 gap-3 text-xs">
+                <div class="p-3 bg-white rounded border border-purple-100 shadow-xs">
+                  <span class="text-slate-500 text-[11px]">Algorithmic Baselines</span>
+                  <div class="text-base font-bold text-slate-800 mt-1">Adaptive ML</div>
+                  <p class="text-[10px] text-slate-400 mt-0.5">Continuous variance calculation</p>
+                </div>
+
+                <div class="p-3 bg-white rounded border border-purple-100 shadow-xs">
+                  <span class="text-slate-500 text-[11px]">Mean Time to Remediate</span>
+                  <div class="text-base font-bold text-emerald-700 mt-1">&lt; 2 minutes</div>
+                  <p class="text-[10px] text-slate-400 mt-0.5">vs 35 min manual baseline</p>
+                </div>
+              </div>
+
+              <div class="p-3 bg-white rounded border border-purple-100 text-xs">
+                <span class="font-bold text-slate-800">Live Insights Recommendation:</span>
+                <p class="text-[11px] text-slate-600 mt-1">
+                  3 anomalies automatically grouped into incident #INC-4819. Autonomous remediations dispatched without human intervention.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="lg:col-span-5 space-y-4">
+            <h3 class="text-2xl font-bold text-slate-900 tracking-tight">
+              Enhance Observability with Insights by Your Side
+            </h3>
+            <ul class="space-y-3 text-sm text-slate-600">
+              <li class="flex items-start">
+                <i class="fa-solid fa-circle-check text-purple-600 text-sm mt-1 mr-3 shrink-0"></i>
+                <span>Gain instant value from anywhere in the Cloud Net platform with no additional setup or configuration.</span>
+              </li>
+              <li class="flex items-start">
+                <i class="fa-solid fa-circle-check text-purple-600 text-sm mt-1 mr-3 shrink-0"></i>
+                <span>Leverage Autonomous Insights capabilities to set up customized anomaly, outlier, and forecast alerts for any type of telemetry.</span>
+              </li>
+            </ul>
+            <div class="pt-2">
+              <a href="/explorer" class="inline-flex items-center space-x-2 px-4 py-2 rounded bg-purple-700 hover:bg-purple-800 text-white font-bold text-xs uppercase tracking-wider transition">
+                <span>Launch Insights Console</span>
+                <i class="fa-solid fa-arrow-right text-[10px]"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ========================================================================= -->
+  <!-- 7. EMBEDDED LIVE LOG STREAM DEMO (Working On The Homepage!) -->
+  <!-- ========================================================================= -->
+  <section id="live-demo" class="py-16 bg-[#fbfcfd] border-b border-[#e1e3e8]">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
+        <div>
+          <span class="text-xs font-bold uppercase tracking-wider text-purple-700 bg-purple-50 px-3 py-1 rounded-full border border-purple-200">
+            Live Interactive Stream
+          </span>
+          <h2 class="mt-2 text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+            Explore Real-Time Log Telemetry Right Here
+          </h2>
+          <p class="text-xs sm:text-sm text-slate-600 mt-1">
+            Filter by service or click any log message to inspect its root-cause telemetry and autonomous remediation audit.
+          </p>
+        </div>
+
+        <div class="flex items-center space-x-3">
+          <a href="/explorer" class="px-4 py-2 rounded bg-purple-700 hover:bg-purple-800 text-white text-xs font-bold transition flex items-center space-x-1.5 shadow-sm">
+            <span>Open Dedicated Console</span>
+            <i class="fa-solid fa-expand text-[10px]"></i>
+          </a>
+        </div>
+      </div>
+
+      <!-- Service Filter Pills -->
+      <div class="flex flex-wrap items-center gap-2 mb-4 text-xs font-medium" id="home-service-pills">
+        <button onclick="filterHomeLogs('all', this)" class="home-srv-btn px-3 py-1 rounded-full bg-purple-700 text-white font-bold">
+          All Services (6.8M)
+        </button>
+        <button onclick="filterHomeLogs('web-store', this)" class="home-srv-btn px-3 py-1 rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200">
+          web-store (1.79M)
+        </button>
+        <button onclick="filterHomeLogs('auth-dotnet', this)" class="home-srv-btn px-3 py-1 rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200">
+          auth-dotnet (1.61M)
+        </button>
+        <button onclick="filterHomeLogs('email-api-py', this)" class="home-srv-btn px-3 py-1 rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200">
+          email-api-py (785K)
+        </button>
+        <button onclick="filterHomeLogs('ad-server', this)" class="home-srv-btn px-3 py-1 rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200">
+          ad-server (398K)
+        </button>
+      </div>
+
+      <!-- Embedded Table Container -->
+      <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="overflow-x-auto max-h-[360px] custom-scrollbar">
+          <table class="w-full text-left text-xs border-collapse">
+            <thead class="bg-[#f8fafc] border-b border-slate-200 text-slate-600 sticky top-0 z-10 font-semibold">
+              <tr>
+                <th class="py-2.5 px-4 w-36">TIMESTAMP</th>
+                <th class="py-2.5 px-4 w-44">HOST</th>
+                <th class="py-2.5 px-4 w-36">SERVICE</th>
+                <th class="py-2.5 px-4">CONTENT</th>
+                <th class="py-2.5 px-4 w-32 text-right">ACTION</th>
+              </tr>
+            </thead>
+            <tbody id="home-logs-tbody" class="divide-y divide-slate-100 font-mono text-[11px]">
+              <tr><td colspan="5" class="py-8 text-center text-slate-400">Loading live telemetry stream...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ========================================================================= -->
+  <!-- 8. REAL RESULTS FROM CLOUD NET CUSTOMERS (Exact Blue Stats Banner) -->
+  <!-- ========================================================================= -->
+  <section class="stats-banner-gradient text-white py-14 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-7xl mx-auto text-center space-y-8">
+      
+      <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight">
+        Real results from Cloud Net customers
+      </h2>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+        <div class="space-y-1">
+          <div class="text-4xl sm:text-5xl font-mono font-extrabold tracking-tight">12B</div>
+          <div class="text-sm font-semibold text-blue-100">Log events each day</div>
+          <p class="text-xs text-blue-200">processed with zero ingestion lag</p>
+        </div>
+
+        <div class="space-y-1">
+          <div class="text-4xl sm:text-5xl font-mono font-extrabold tracking-tight">&lt; 2 min</div>
+          <div class="text-sm font-semibold text-blue-100">Mean time to remediation (MTTR)</div>
+          <p class="text-xs text-blue-200">reduced from 35 min manual triage</p>
+        </div>
+
+        <div class="space-y-1">
+          <div class="text-4xl sm:text-5xl font-mono font-extrabold tracking-tight">50%</div>
+          <div class="text-sm font-semibold text-blue-100">Cost savings on cloud</div>
+          <p class="text-xs text-blue-200">via intelligent Flex Log retention</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- ========================================================================= -->
+  <!-- 10. BOTTOM CTA BANNER -->
+  <!-- ========================================================================= -->
+  <section class="bottom-cta-gradient text-white py-16 px-4 sm:px-6 lg:px-8 text-center">
+    <div class="max-w-3xl mx-auto space-y-6">
+      <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight">
+        Get free unlimited monitoring for 14 days
+      </h2>
+      <p class="text-purple-100 text-sm sm:text-base leading-relaxed">
+        Join engineering teams using Cloud Net to detect log anomalies and trigger autonomous self-healing before users notice an outage.
+      </p>
+
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
+        <button onclick="openAuthModal('signup')" class="w-full sm:w-auto px-6 py-3 rounded-md bg-white text-purple-900 hover:bg-slate-100 font-bold text-xs uppercase tracking-wider shadow-lg transition">
+          Start Your Free Trial
+        </button>
+        <button onclick="openDemoModal()" class="w-full sm:w-auto px-6 py-3 rounded-md bg-purple-900/60 hover:bg-purple-900 text-white border border-purple-400 font-bold text-xs uppercase tracking-wider transition">
+          Request a Demo
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================================= -->
+  <!-- 11. FOOTER -->
+  <!-- ========================================================================= -->
+  <footer class="bg-[#171b26] text-slate-400 py-10 px-4 sm:px-6 lg:px-8 text-xs border-t border-slate-800">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex items-center space-x-2">
+        <div class="w-5 h-5 rounded bg-purple-600 flex items-center justify-center text-white text-[10px] font-bold">
+          CN
+        </div>
+        <span class="text-slate-300 font-semibold">Cloud Net Observability Platform</span>
+        <span>• © 2026 Cloud Net Inc. All rights reserved.</span>
+      </div>
+      <div class="flex items-center space-x-6 text-slate-400">
+        <a href="#product" class="hover:text-white transition">Product</a>
+        <a href="/explorer" class="hover:text-white transition font-bold text-purple-400">Log Explorer</a>
+        <a href="#self-healing" class="hover:text-white transition">Self-Healing</a>
+        <a href="#features" class="hover:text-white transition">Features</a>
+        <a href="#integrations" class="hover:text-white transition">Integrations</a>
+        <a href="#" class="hover:text-white transition">Privacy</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: FREE TRIAL SIGNUP / AUTH -->
+  <!-- ========================================================================= -->
+  <div id="auth-modal" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl shadow-2xl border border-slate-200 w-full max-w-md overflow-hidden animate-fadeIn">
+      <div class="p-4 bg-purple-900 text-white flex items-center justify-between">
+        <div class="flex items-center space-x-2">
+          <i class="fa-solid fa-cloud-bolt text-pink-400"></i>
+          <span class="font-bold text-sm" id="auth-modal-title">Start Your Free 14-Day Trial</span>
+        </div>
+        <button onclick="closeAuthModal()" class="text-purple-200 hover:text-white">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <form id="auth-modal-form" class="p-6 space-y-4 text-xs" onsubmit="handleAuthSubmit(event)">
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Work Email</label>
+          <input type="email" id="auth-email-input" required placeholder="you@company.com" class="w-full p-2.5 rounded border border-slate-300 focus:outline-none focus:border-purple-600">
+        </div>
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Full Name</label>
+          <input type="text" required placeholder="Mansi M" class="w-full p-2.5 rounded border border-slate-300 focus:outline-none focus:border-purple-600">
+        </div>
+
+        <div class="pt-2">
+          <button type="submit" class="w-full py-3 rounded bg-purple-700 hover:bg-purple-800 text-white font-bold text-xs uppercase tracking-wider shadow-md transition">
+            Launch Instant Trial Console
+          </button>
+        </div>
+        <p class="text-[10px] text-slate-400 text-center">
+          Instant activation • No credit card required • Full platform access
+        </p>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: REQUEST A DEMO (Directly Sends Mail to Mansi) -->
+  <!-- ========================================================================= -->
+  <div id="demo-modal" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl shadow-2xl border border-slate-200 w-full max-w-lg overflow-hidden animate-fadeIn">
+      <div class="p-4 bg-gradient-to-r from-purple-800 to-indigo-900 text-white flex items-center justify-between">
+        <div class="flex items-center space-x-2">
+          <i class="fa-solid fa-envelope-open-text text-pink-400"></i>
+          <span class="font-bold text-sm">Request a Demo — Direct to Mansi</span>
+        </div>
+        <button onclick="closeDemoModal()" class="text-purple-200 hover:text-white">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <form id="demo-request-form" onsubmit="submitDemoRequest(event)" class="p-6 space-y-4 text-xs">
+        <div class="p-3 bg-purple-50 rounded-lg border border-purple-200 text-purple-950 flex items-start space-x-2.5">
+          <i class="fa-solid fa-circle-info text-purple-600 mt-0.5"></i>
+          <div class="leading-relaxed">
+            Fill in your details to schedule a live 1-on-1 walkthrough. This will directly send an email inquiry to <strong>Mansi M</strong> (Lead Architect).
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-slate-700 font-semibold mb-1">Your Full Name *</label>
+            <input type="text" id="demo-name" required placeholder="e.g. Alex Morgan" class="w-full px-3 py-2 border border-slate-300 rounded focus:border-purple-600 focus:outline-none text-slate-800">
+          </div>
+          <div>
+            <label class="block text-slate-700 font-semibold mb-1">Your Work Email *</label>
+            <input type="email" id="demo-email" required placeholder="alex@company.com" class="w-full px-3 py-2 border border-slate-300 rounded focus:border-purple-600 focus:outline-none text-slate-800">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-slate-700 font-semibold mb-1">Company / Organization *</label>
+          <input type="text" id="demo-company" required placeholder="e.g. Stripe, Uber, Netflix, University Lab" class="w-full px-3 py-2 border border-slate-300 rounded focus:border-purple-600 focus:outline-none text-slate-800">
+        </div>
+
+        <div>
+          <label class="block text-slate-700 font-semibold mb-1">Message / Key Focus Area</label>
+          <textarea id="demo-notes" rows="3" class="w-full px-3 py-2 border border-slate-300 rounded focus:border-purple-600 focus:outline-none text-slate-800 resize-none">Hi Mansi, I would like to schedule a technical walkthrough of Cloud Net's autonomous log anomaly detection and self-healing engine on our HDFS stack.</textarea>
+        </div>
+
+        <div id="demo-status-box" class="hidden p-3 rounded text-[11px]"></div>
+
+        <div class="flex items-center space-x-2 pt-2">
+          <button type="submit" id="demo-submit-btn" class="flex-1 py-2.5 rounded bg-purple-700 hover:bg-purple-800 text-white font-bold text-center shadow-md transition flex items-center justify-center space-x-2">
+            <i class="fa-solid fa-paper-plane text-xs"></i>
+            <span>Send Email to Mansi</span>
+          </button>
+          <button type="button" onclick="closeDemoModal()" class="px-4 py-2.5 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold transition">
+            Cancel
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: LOG INSPECTOR & REMEDIATION AUDIT -->
+  <!-- ========================================================================= -->
+  <div id="home-inspector-modal" class="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs hidden flex items-center justify-center p-4">
+    <div class="bg-white border border-slate-200 rounded-lg w-full max-w-2xl max-h-[85vh] flex flex-col shadow-2xl overflow-hidden animate-fadeIn text-xs">
+      
+      <div class="p-3 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+        <div class="flex items-center space-x-2">
+          <i class="fa-solid fa-bug text-purple-700"></i>
+          <span class="font-bold text-slate-900" id="home-modal-title">Log Diagnostic Telemetry</span>
+        </div>
+        <button onclick="closeHomeModal()" class="text-slate-400 hover:text-slate-700">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="p-4 overflow-y-auto space-y-3 custom-scrollbar">
+        <div class="p-3 rounded bg-purple-50 border border-purple-200 text-purple-950">
+          <div class="font-bold text-xs flex items-center justify-between">
+            <span>⚡ Cloud Net Autonomous Self-Healing Execution:</span>
+            <span class="text-emerald-700 font-mono font-bold" id="home-modal-speedup">7,500x Speedup</span>
+          </div>
+          <div class="mt-1 text-[11px] text-slate-700" id="home-modal-healing-details">
+            FSCK VolumeMap consistency verified (0 orphan pointers; status=HEALTHY) in 280 ms.
+          </div>
+        </div>
+
+        <div>
+          <div class="font-bold text-slate-700 mb-1">Raw Log Message:</div>
+          <pre class="bg-slate-900 text-slate-100 p-3 rounded font-mono text-[11px] whitespace-pre-wrap leading-relaxed" id="home-modal-raw"></pre>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2 text-[11px]">
+          <div class="bg-slate-50 p-2 rounded border border-slate-200">
+            <span class="text-slate-400">Host:</span> <span id="home-modal-host" class="font-mono text-slate-800"></span>
+          </div>
+          <div class="bg-slate-50 p-2 rounded border border-slate-200">
+            <span class="text-slate-400">Service:</span> <span id="home-modal-service" class="font-mono text-slate-800"></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="p-2.5 bg-slate-50 border-t border-slate-200 text-right">
+        <button onclick="closeHomeModal()" class="px-3 py-1 bg-slate-200 hover:bg-slate-300 text-slate-800 rounded font-semibold text-xs">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- INTERACTIVE SCRIPTS -->
+  <script>
+    // 1. Modals
+    function openAuthModal(mode) {
+      document.getElementById('auth-modal').classList.remove('hidden');
+      if (mode === 'signin') {
+        document.getElementById('auth-modal-title').textContent = 'Sign In to Cloud Net Console';
+      } else {
+        document.getElementById('auth-modal-title').textContent = 'Start Your Free 14-Day Trial';
+      }
+    }
+    function closeAuthModal() {
+      document.getElementById('auth-modal').classList.add('hidden');
+    }
+    function openDemoModal() {
+      document.getElementById('demo-modal').classList.remove('hidden');
+    }
+    function closeDemoModal() {
+      document.getElementById('demo-modal').classList.add('hidden');
+    }
+    async function submitDemoRequest(e) {
+      e.preventDefault();
+      const name = document.getElementById('demo-name').value.trim();
+      const email = document.getElementById('demo-email').value.trim();
+      const company = document.getElementById('demo-company').value.trim();
+      const notes = document.getElementById('demo-notes').value.trim();
+      const statusBox = document.getElementById('demo-status-box');
+      const submitBtn = document.getElementById('demo-submit-btn');
+
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-1.5"></i> Sending to Mansi...`;
+
+      try {
+        await fetch('/api/request-demo', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, email, company, notes })
+        });
+        
+        // Open user's email client directly pre-addressed to Mansi
+        const subject = encodeURIComponent(`[Cloud Net Demo Request] from ${name} (${company})`);
+        const body = encodeURIComponent(`Hi Mansi,\n\nI would like to schedule a Cloud Net technical demo for our infrastructure.\n\nName: ${name}\nEmail: ${email}\nCompany: ${company}\nFocus / Questions:\n${notes}\n\nBest regards,\n${name}`);
+        window.open(`mailto:mansi.sharma@cloudnet.io?subject=${subject}&body=${body}`, '_blank');
+
+        statusBox.className = 'p-3 bg-emerald-50 border border-emerald-200 text-emerald-900 rounded text-xs space-y-1 block animate-fadeIn';
+        statusBox.innerHTML = `
+          <div class="font-bold flex items-center"><i class="fa-solid fa-check-circle text-emerald-600 mr-1.5"></i> Demo Request Sent to Mansi!</div>
+          <div>Your inquiry was recorded, and an email to <strong>mansi.sharma@cloudnet.io</strong> was opened in your email client.</div>
+        `;
+        submitBtn.innerHTML = `<i class="fa-solid fa-check mr-1.5"></i> Email Dispatched!`;
+      } catch (err) {
+        statusBox.className = 'p-3 bg-rose-50 border border-rose-200 text-rose-900 rounded text-xs block';
+        statusBox.textContent = 'Demo inquiry opened. If email client did not launch, please email mansi.sharma@cloudnet.io directly.';
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = `Send Email to Mansi`;
+      }
+    }
+    function handleHeroSubmit(e) {
+      e.preventDefault();
+      const email = document.getElementById('hero-email').value;
+      document.getElementById('auth-email-input').value = email;
+      openAuthModal('signup');
+    }
+    function handleAuthSubmit(e) {
+      e.preventDefault();
+      alert('Welcome to Cloud Net! Redirecting you to the live Log Anomaly Explorer...');
+      closeAuthModal();
+      window.location.href = '/explorer';
+    }
+
+    // 2. Interactive Feature Tabs Switcher
+    function switchFeatureTab(tabKey, btn) {
+      document.querySelectorAll('.feature-tab-btn').forEach(b => {
+        b.classList.remove('active-tab');
+        b.classList.remove('font-bold');
+        b.classList.remove('text-purple-800');
+        b.classList.add('text-slate-600');
+        b.classList.add('font-semibold');
+      });
+      btn.classList.add('active-tab');
+      btn.classList.add('font-bold');
+      btn.classList.add('text-purple-800');
+      btn.classList.remove('text-slate-600');
+
+      const panes = ['anomaly', 'storage', 'context', 'ux', 'watchdog'];
+      panes.forEach(p => {
+        const el = document.getElementById(`tab-pane-${p}`);
+        if (el) {
+          if (p === tabKey) {
+            el.classList.remove('hidden');
+            el.classList.add('grid');
+          } else {
+            el.classList.add('hidden');
+            el.classList.remove('grid');
+          }
+        }
+      });
+    }
+
+    // 3. Interactive Tiered Storage Calculator
+    function updateStorageCalc(gbVal) {
+      document.getElementById('slider-vol-label').textContent = `${Number(gbVal).toLocaleString()} GB / day`;
+      const stdCost = Math.round(gbVal * 3.0);
+      const flexCost = Math.round(gbVal * 1.44);
+      const savings = stdCost - flexCost;
+      const pct = Math.round((savings / stdCost) * 100);
+
+      document.getElementById('calc-std-cost').textContent = `$${stdCost.toLocaleString()} / mo`;
+      document.getElementById('calc-flex-cost').textContent = `$${flexCost.toLocaleString()} / mo`;
+      document.getElementById('calc-savings').textContent = `$${savings.toLocaleString()} saved (${pct}%)`;
+    }
+
+    // 4. Interactive Live Incident & Self-Healing Terminal Simulator
+    let selectedFault = 'Metadata desync';
+    const faultTargets = {
+      'Metadata desync': { srv: 'auth-dotnet', action: 'FSCK_METADATA_RESYNC_AND_ORPHAN_PURGE', latency: '280 ms (vs 35 min manual)' },
+      'Network I/O': { srv: 'email-api-py', action: 'CIRCUIT_BREAKER_RESET_AND_PIPELINE_FAILOVER', latency: '320 ms (vs 40 min manual)' },
+      'Under-replication': { srv: 'web-store', action: 'DYNAMIC_FORCE_RE_REPLICATION', latency: '350 ms (vs 30 min manual)' },
+      'Thread contention': { srv: 'ad-server', action: 'RECYCLE_DATAXCEIVER_WORKERS', latency: '310 ms (vs 20 min manual)' }
+    };
+
+    function selectFault(faultKey, btn) {
+      selectedFault = faultKey;
+      document.querySelectorAll('.fault-btn').forEach(b => {
+        b.className = 'fault-btn px-2.5 py-1 rounded text-xs font-normal border border-slate-200 text-slate-600 hover:bg-slate-100';
+      });
+      btn.className = 'fault-btn px-2.5 py-1 rounded text-xs font-semibold border border-purple-600 bg-purple-50 text-purple-800';
+
+      const cfg = faultTargets[faultKey];
+      document.getElementById('sim-target-label').textContent = `${cfg.srv} (${faultKey})`;
+      document.getElementById('sim-action-label').textContent = cfg.action;
+      document.getElementById('sim-latency-label').textContent = cfg.latency;
+    }
+
+    async function runInteractiveSimulator() {
+      const term = document.getElementById('terminal-output');
+      const badge = document.getElementById('sim-status-badge');
+      const runBtn = document.getElementById('sim-run-btn');
+
+      runBtn.disabled = true;
+      runBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> Running Self-Healing...';
+      badge.className = 'px-2 py-0.5 rounded text-[10px] font-mono bg-rose-950 text-rose-400 border border-rose-800 animate-pulse';
+      badge.textContent = 'FAULT INJECTED — RUNNING AUTO-REMEDIATION';
+
+      term.innerHTML = `
+        <div class="text-rose-400 font-bold">>>> [FAULT INJECTION TRIGGERED] Target: ${selectedFault}</div>
+      `;
+
+      try {
+        const cfg = faultTargets[selectedFault];
+        const res = await fetch('/api/simulate-anomaly', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ service: cfg.srv, fault_type: selectedFault })
+        });
+        const data = await res.json();
+
+        // Print steps sequentially
+        let delay = 300;
+        data.steps.forEach((st, idx) => {
+          setTimeout(() => {
+            const row = document.createElement('div');
+            if (st.step === 1) {
+              row.className = 'text-amber-400';
+              row.textContent = `[+${st.time_ms}ms] [INSIGHTS ALARM] ${st.detail}`;
+            } else if (st.step === 2) {
+              row.className = 'text-sky-300';
+              row.textContent = `[+${st.time_ms}ms] [RCA CLASSIFIER] ${st.detail}`;
+            } else if (st.step === 3) {
+              row.className = 'text-purple-300';
+              row.textContent = `[+${st.time_ms}ms] [AUTOMATED ACTION] ${st.detail}`;
+            } else if (st.step === 4) {
+              row.className = 'text-slate-200';
+              row.textContent = `[+${st.time_ms}ms] [EXECUTE ACTION] ${st.detail}`;
+            } else {
+              row.className = 'text-emerald-400 font-bold';
+              row.textContent = `[+${st.time_ms}ms] [VERIFIED HEALTHY] ${st.detail}`;
+              badge.className = 'px-2 py-0.5 rounded text-[10px] font-mono bg-emerald-950 text-emerald-400 border border-emerald-800';
+              badge.textContent = `HEALTHY (AUTO-HEALED in ${data.remediation.auto_ms}ms • ${data.speedup} SPEEDUP)`;
+              runBtn.disabled = false;
+              runBtn.innerHTML = '<i class="fa-solid fa-play text-[10px] mr-1"></i> Run Live Autonomous Remediation';
+              loadHomeLogs();
+            }
+            term.appendChild(row);
+          }, delay);
+          delay += 400;
+        });
+
+      } catch (err) {
+        console.error(err);
+        runBtn.disabled = false;
+        runBtn.innerHTML = '<i class="fa-solid fa-play text-[10px] mr-1"></i> Run Live Autonomous Remediation';
+      }
+    }
+
+    // Lifecycle Stepper: Before -> During -> After
+    function setLifecycleStage(stage) {
+      // Update buttons
+      for (let i = 1; i <= 3; i++) {
+        const btn = document.getElementById(`lstep-btn-${i}`);
+        const card = document.getElementById(`lcard-${i}`);
+        if (btn && card) {
+          if (i === stage) {
+            btn.className = i === 1 
+              ? 'px-3 py-1 rounded font-bold bg-white text-rose-700 shadow-xs'
+              : (i === 2 ? 'px-3 py-1 rounded font-bold bg-white text-purple-700 shadow-xs' : 'px-3 py-1 rounded font-bold bg-white text-emerald-700 shadow-xs');
+            card.className = i === 1
+              ? 'p-4 rounded-xl border-2 border-rose-400 bg-rose-50/40 shadow-xs space-y-3 transition transform scale-[1.02]'
+              : (i === 2 ? 'p-4 rounded-xl border-2 border-purple-400 bg-purple-50/40 shadow-xs space-y-3 transition transform scale-[1.02]' : 'p-4 rounded-xl border-2 border-emerald-400 bg-emerald-50/40 shadow-xs space-y-3 transition transform scale-[1.02]');
+          } else {
+            btn.className = 'px-3 py-1 rounded font-medium text-slate-600 hover:text-slate-900';
+            card.className = 'p-4 rounded-xl border border-slate-200 bg-slate-50 opacity-50 shadow-xs space-y-3 transition';
+          }
+        }
+      }
+    }
+
+    let lifecycleTimer = null;
+    function playFullLifecycleDemo() {
+      if (lifecycleTimer) clearInterval(lifecycleTimer);
+      let curr = 1;
+      setLifecycleStage(curr);
+      lifecycleTimer = setInterval(() => {
+        curr++;
+        if (curr > 3) {
+          clearInterval(lifecycleTimer);
+          return;
+        }
+        setLifecycleStage(curr);
+      }, 1500);
+    }
+
+    async function triggerHeroIncident() {
+      const btn = document.getElementById('hero-incident-btn');
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> Simulating...';
+      try {
+        const res = await fetch('/api/simulate-anomaly', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ service: 'email-api-py' })
+        });
+        const data = await res.json();
+        alert(`⚡ Live Incident Injected on ${data.log.service}!\nCloud Net Autonomous Self-Healing activated:\nAction: ${data.remediation.action_name}\nLatency: ${data.remediation.auto_ms} ms (replaces ${data.remediation.manual_label} manual triage).`);
+        btn.innerHTML = '<i class="fa-solid fa-bolt text-amber-500"></i> Inject Anomaly Live';
+        loadHomeLogs();
+      } catch (err) {
+        console.error(err);
+        btn.innerHTML = '<i class="fa-solid fa-bolt text-amber-500"></i> Inject Anomaly Live';
+      }
+    }
+
+    // 5. Embedded Live Logs Stream
+    let currentHomeService = 'all';
+
+    async function loadHomeLogs() {
+      const tbody = document.getElementById('home-logs-tbody');
+      try {
+        const res = await fetch(`/api/logs?page=1&limit=8&services=${currentHomeService}&status=all`);
+        const data = await res.json();
+        tbody.innerHTML = '';
+
+        data.items.forEach(l => {
+          const tr = document.createElement('tr');
+          tr.className = 'hover:bg-slate-50 transition cursor-pointer';
+          tr.innerHTML = `
+            <td class="py-2.5 px-4 text-slate-500 whitespace-nowrap">${l.date}</td>
+            <td class="py-2.5 px-4 text-slate-600 font-mono text-[10px] truncate max-w-[150px]">${l.host}</td>
+            <td class="py-2.5 px-4"><span class="text-indigo-600 font-semibold">${l.service}</span></td>
+            <td class="py-2.5 px-4 text-slate-700">
+              <div class="flex items-center space-x-1.5 truncate">
+                ${l.is_anomaly ? '<span class="bg-[#fde8ef] text-[#d61f59] border border-[#f8b4c8] px-1 py-0.2 rounded text-[9px] font-bold uppercase shrink-0">ERROR</span>' : ''}
+                ${l.is_healed ? '<span class="bg-emerald-50 text-emerald-700 border border-emerald-200 px-1 py-0.2 rounded text-[9px] font-bold uppercase shrink-0">HEALED</span>' : ''}
+                <span class="truncate">${l.content}</span>
+              </div>
+            </td>
+            <td class="py-2.5 px-4 text-right space-x-1 whitespace-nowrap">
+              ${l.is_anomaly ? `
+                <button class="px-2 py-0.5 rounded bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[10px]" onclick="healHomeLog('${l.id}', '${l.service}', event)">
+                  ⚡ Fix & Remove
+                </button>
+              ` : ''}
+              <button class="px-2 py-0.5 rounded bg-purple-50 text-purple-700 hover:bg-purple-100 font-semibold text-[10px]" onclick="openHomeModal(l)">Inspect</button>
+            </td>
+          `;
+          tr.addEventListener('click', () => openHomeModal(l));
+          tbody.appendChild(tr);
+        });
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    async function healHomeLog(logId, serviceName, e) {
+      if (e) e.stopPropagation();
+      try {
+        await fetch('/api/heal-anomaly', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ log_id: logId, service: serviceName })
+        });
+        loadHomeLogs();
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    function filterHomeLogs(srv, btn) {
+      currentHomeService = srv;
+      document.querySelectorAll('.home-srv-btn').forEach(b => {
+        b.className = 'home-srv-btn px-3 py-1 rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200';
+      });
+      btn.className = 'home-srv-btn px-3 py-1 rounded-full bg-purple-700 text-white font-bold';
+      loadHomeLogs();
+    }
+
+    function openHomeModal(l) {
+      document.getElementById('home-inspector-modal').classList.remove('hidden');
+      document.getElementById('home-modal-title').textContent = `${l.service} — ${l.date}`;
+      document.getElementById('home-modal-host').textContent = l.host;
+      document.getElementById('home-modal-service').textContent = l.service;
+      document.getElementById('home-modal-raw').textContent = l.content;
+
+      if (l.policy) {
+        const speedup = Math.round((l.policy.manual_s * 1000) / l.policy.auto_ms).toLocaleString() + 'x Speedup';
+        document.getElementById('home-modal-speedup').textContent = speedup;
+        document.getElementById('home-modal-healing-details').textContent = `${l.policy.action_name}: ${l.policy.post_verification} in ${l.policy.auto_ms} ms (replaces ${l.policy.manual_label} manual triage).`;
+      } else {
+        document.getElementById('home-modal-speedup').textContent = 'Nominal SLA';
+        document.getElementById('home-modal-healing-details').textContent = 'Routine operation executed successfully. No self-healing required.';
+      }
+    }
+
+    function closeHomeModal() {
+      document.getElementById('home-inspector-modal').classList.add('hidden');
+    }
+
+    // Load on init
+    document.addEventListener('DOMContentLoaded', () => {
+      loadHomeLogs();
+    });
+  </script>
+</body>
+</html>

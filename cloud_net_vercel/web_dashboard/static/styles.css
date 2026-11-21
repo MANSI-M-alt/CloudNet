@@ -1,0 +1,209 @@
+/* ==========================================================================
+   Cloud Net — Datadog Log Anomaly Detection & Autonomous Self-Healing
+   Styles for High-Fidelity Interactive Product Website & Explorer
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600;700;800&family=Roboto+Mono:wght@400;500;600;700&display=swap');
+
+:root {
+  --dd-purple: #632ca6;
+  --dd-purple-dark: #4d1d8a;
+  --dd-purple-light: #7c3aed;
+  --dd-purple-soft: #f5f0fc;
+  --dd-border: #e1e3e8;
+  --dd-bg-light: #f5f6f8;
+  --dd-text: #212529;
+  --dd-muted: #6c757d;
+  --dd-blue: #0275d8;
+  --dd-blue-bar: #38bdf8;
+  --dd-pink-bar: #ea3875;
+  --dd-error-bg: #fde8ef;
+  --dd-error-text: #d61f59;
+  --dd-emerald: #10b981;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  color: var(--dd-text);
+  background-color: #ffffff;
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Custom Scrollbars */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Gradients */
+.hero-gradient {
+  background: linear-gradient(135deg, #3d1b6e 0%, #632ca6 45%, #4f1d8c 100%);
+}
+
+.bottom-cta-gradient {
+  background: linear-gradient(135deg, #4d1d8a 0%, #632ca6 50%, #7e22ce 100%);
+}
+
+.stats-banner-gradient {
+  background: linear-gradient(90deg, #1d4ed8 0%, #2563eb 50%, #3b82f6 100%);
+}
+
+/* Interactive Tabs */
+.feature-tab-btn {
+  transition: all 0.2s ease;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+}
+.feature-tab-btn.active-tab {
+  border-bottom: 2px solid #7c3aed;
+  color: #632ca6 !important;
+  font-weight: 700 !important;
+  background-color: #f5f0fc;
+}
+
+/* Watchdog Outlier Card (NO overlap design) */
+.watchdog-outlier-card {
+  background: #ffffff;
+  border: 1px solid var(--dd-border);
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+.watchdog-outlier-card:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.07);
+}
+
+/* Pattern Bar */
+.pattern-bar-container {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 10px 12px;
+  margin-top: 8px;
+}
+
+/* Timeline Bars */
+.timeline-bar-col {
+  transition: transform 0.15s ease, opacity 0.15s ease;
+  cursor: pointer;
+}
+.timeline-bar-col:hover {
+  transform: translateY(-2px);
+  opacity: 0.9;
+}
+
+/* Active Control Buttons in Explorer */
+.btn-active {
+  background-color: #e2e8f0 !important;
+  color: #0f172a !important;
+  font-weight: 700 !important;
+  border: 1px solid #cbd5e1 !important;
+}
+
+.btn-inactive {
+  background-color: transparent !important;
+  color: #64748b !important;
+  font-weight: 500 !important;
+  border: 1px solid transparent !important;
+}
+.btn-inactive:hover {
+  background-color: #f1f5f9 !important;
+  color: #1e293b !important;
+}
+
+/* Table Row Hover */
+.log-table-row {
+  transition: background-color 0.1s ease;
+}
+.log-table-row:hover {
+  background-color: #f8fafc;
+}
+
+/* Terminal Simulator Styles */
+.terminal-window {
+  background-color: #0f172a;
+  border: 1px solid #1e293b;
+  border-radius: 8px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+  font-family: 'Roboto Mono', monospace;
+}
+
+.terminal-header {
+  background-color: #1e293b;
+  padding: 8px 12px;
+  border-bottom: 1px solid #334155;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.terminal-body {
+  padding: 14px;
+  color: #e2e8f0;
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fadeIn {
+  animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Pulse dot */
+.pulse-dot {
+  box-shadow: 0 0 0 0 rgba(234, 56, 117, 0.7);
+  animation: pulse 1.6s infinite;
+}
+@keyframes pulse {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(234, 56, 117, 0.7); }
+  70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(234, 56, 117, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(234, 56, 117, 0); }
+}
+
+/* Custom Range Slider for ROI Calculator */
+input[type=range] {
+  -webkit-appearance: none;
+  width: 100%;
+  background: transparent;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  height: 18px;
+  width: 18px;
+  border-radius: 50%;
+  background: #632ca6;
+  cursor: pointer;
+  margin-top: -6px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+}
+input[type=range]::-webkit-slider-runnable-track {
+  width: 100%;
+  height: 6px;
+  cursor: pointer;
+  background: #e2e8f0;
+  border-radius: 3px;
+}

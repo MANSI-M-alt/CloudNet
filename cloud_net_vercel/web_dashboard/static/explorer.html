@@ -1,0 +1,1257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cloud Net | Observability, Traces, Monitors & Insights Console</title>
+  <link rel="icon" href="https://img.icons8.com/color/48/datadog.png" type="image/png">
+  
+  <!-- Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;600&family=Open+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            datadog: {
+              purple: '#632ca6',
+              border: '#e1e3e8',
+              bgLight: '#f5f6f8',
+              pinkCap: '#ea3875',
+              blueBar: '#38bdf8',
+            }
+          },
+          fontFamily: {
+            sans: ['"Open Sans"', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+            mono: ['"Roboto Mono"', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body class="bg-[#f5f6f8] text-[#212529] font-sans antialiased h-screen overflow-hidden flex select-none">
+
+  <!-- ========================================================================= -->
+  <!-- 1. SLIM LEFTMOST DARK DOCK (Working Navigation to All Dashboards + Account) -->
+  <!-- ========================================================================= -->
+  <aside class="w-12 bg-[#171b26] flex flex-col items-center py-3 justify-between shrink-0 z-30">
+    <div class="flex flex-col items-center space-y-4">
+      <!-- Return to Home link -->
+      <a href="/" title="Cloud Net Home" class="w-7 h-7 rounded bg-gradient-to-tr from-purple-600 to-pink-600 flex items-center justify-center text-white shadow hover:scale-105 transition">
+        <i class="fa-solid fa-cloud-bolt text-xs"></i>
+      </a>
+
+      <div class="w-6 h-px bg-slate-700/60 my-1"></div>
+
+      <!-- Dock Dashboard Switchers -->
+      <a href="/" class="w-8 h-8 rounded text-slate-400 hover:text-white hover:bg-slate-800 flex items-center justify-center transition" title="Home Website">
+        <i class="fa-solid fa-house text-xs"></i>
+      </a>
+
+      <!-- 1. Logs Explorer (Active by default) -->
+      <button onclick="switchMainDashboard('logs', this)" id="dock-btn-logs" class="dock-btn w-8 h-8 rounded text-white bg-purple-600 flex items-center justify-center shadow-inner transition" title="Log Anomaly Explorer">
+        <i class="fa-solid fa-list-check text-xs"></i>
+      </button>
+
+      <!-- 2. Monitors & Alerts Dashboard (With Live Notification Badge) -->
+      <button onclick="switchMainDashboard('monitors', this)" id="dock-btn-monitors" class="dock-btn relative w-8 h-8 rounded text-slate-400 hover:text-white hover:bg-slate-800 flex items-center justify-center transition" title="Monitors & Alerts (2 Active Alerts)">
+        <i class="fa-solid fa-bell text-xs"></i>
+        <span id="monitors-notif-badge" class="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-rose-500 text-white font-mono font-bold text-[9px] flex items-center justify-center border border-[#171b26] animate-pulse">2</span>
+      </button>
+
+
+
+      <!-- 3. History & Persistent Audit Archives -->
+      <button onclick="switchMainDashboard('history', this)" id="dock-btn-history" class="dock-btn relative w-8 h-8 rounded text-slate-400 hover:text-white hover:bg-slate-800 flex items-center justify-center transition" title="History & Persistent Audit Archives">
+        <i class="fa-solid fa-clock-rotate-left text-xs"></i>
+      </button>
+    </div>
+
+    <!-- Bottom: Interactive Account Section (Mansi M) -->
+    <div class="flex flex-col items-center space-y-3">
+      <button onclick="openAccountModal()" class="w-7 h-7 rounded-full bg-gradient-to-tr from-purple-700 to-indigo-800 text-purple-100 hover:ring-2 hover:ring-purple-400 text-[10px] font-bold flex items-center justify-center shadow transition" title="Mansi M (Lead Architect & Admin)">
+        MM
+      </button>
+    </div>
+  </aside>
+
+  <!-- ========================================================================= -->
+  <!-- 2. MAIN APPLICATION CONTENT AREA -->
+  <!-- ========================================================================= -->
+  <div class="flex-1 flex flex-col min-w-0 bg-white">
+
+    <!-- ----------------------------------------------------------------------- -->
+    <!-- DASHBOARD 1: LOGS EXPLORER (Default) -->
+    <!-- ----------------------------------------------------------------------- -->
+    <div id="view-dashboard-logs" class="flex-1 flex flex-col min-h-0 bg-white">
+      
+      <!-- Top Bar -->
+      <header class="h-10 px-4 bg-white border-b border-[#e1e3e8] flex items-center justify-between shrink-0 text-xs">
+        <div class="flex items-center space-x-3">
+          <a href="/" class="flex items-center space-x-1 text-slate-600 hover:text-purple-700 font-semibold px-2 py-1 rounded hover:bg-slate-100 transition">
+            <i class="fa-solid fa-arrow-left text-[10px]"></i>
+            <span>Website</span>
+          </a>
+
+          <div class="h-4 w-px bg-slate-200"></div>
+
+          <!-- Functional Views Dropdown -->
+          <div class="relative">
+            <button id="views-dropdown-btn" onclick="toggleViewsDropdown()" class="flex items-center space-x-1.5 text-slate-700 hover:text-slate-900 font-semibold px-2.5 py-1 rounded hover:bg-slate-100 border border-transparent hover:border-slate-300 transition">
+              <i class="fa-solid fa-layer-group text-purple-600"></i>
+              <span id="current-view-name">Views: All System Logs</span>
+              <i class="fa-solid fa-chevron-down text-[9px] text-slate-400"></i>
+            </button>
+
+            <!-- Dropdown Menu -->
+            <div id="views-menu" class="hidden absolute left-0 mt-1.5 w-64 bg-white border border-slate-200 rounded-lg shadow-xl py-1 z-50 text-xs animate-fadeIn">
+              <div class="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400 border-b border-slate-100">Saved Presets</div>
+              <button onclick="applyPredefinedView('all')" class="w-full text-left px-3 py-2 hover:bg-purple-50 flex items-center justify-between group transition">
+                <span class="font-medium text-slate-800 group-hover:text-purple-700">All System Logs</span>
+                <span class="text-[10px] text-slate-400">Default</span>
+              </button>
+              <button onclick="applyPredefinedView('anomalies')" class="w-full text-left px-3 py-2 hover:bg-rose-50 flex items-center justify-between group transition">
+                <span class="font-medium text-rose-700 group-hover:text-rose-900">Anomalies & Errors</span>
+                <span class="text-[9px] px-1.5 py-0.5 rounded bg-rose-100 text-rose-800 font-bold">OUTLIERS</span>
+              </button>
+              <button onclick="applyPredefinedView('hdfs')" class="w-full text-left px-3 py-2 hover:bg-purple-50 flex items-center justify-between group transition">
+                <span class="font-medium text-slate-800 group-hover:text-purple-700">HDFS VolumeMap Issues</span>
+                <span class="text-[10px] text-purple-600 font-mono">auth-dotnet</span>
+              </button>
+              <button onclick="applyPredefinedView('python')" class="w-full text-left px-3 py-2 hover:bg-purple-50 flex items-center justify-between group transition">
+                <span class="font-medium text-slate-800 group-hover:text-purple-700">Python Worker Pipeline</span>
+                <span class="text-[10px] text-slate-400 font-mono">email-api</span>
+              </button>
+              <div class="border-t border-slate-100 my-1"></div>
+              <button onclick="saveCurrentCustomView()" class="w-full text-left px-3 py-2 text-purple-700 hover:bg-purple-50 font-semibold flex items-center space-x-1.5 transition">
+                <i class="fa-solid fa-floppy-disk text-[10px]"></i>
+                <span>Save Current View...</span>
+              </button>
+            </div>
+          </div>
+
+          <button id="save-view-btn" onclick="saveCurrentCustomView()" class="flex items-center space-x-1 text-slate-700 hover:text-slate-900 font-medium px-2 py-0.5 rounded border border-slate-300 bg-white hover:bg-slate-50 shadow-xs transition">
+            <i class="fa-solid fa-plus text-[10px] text-slate-500"></i>
+            <span>Save</span>
+          </button>
+        </div>
+
+        <div class="flex items-center space-x-3 text-xs">
+          <!-- Real-Time Stream Status Pill -->
+          <div class="hidden sm:flex items-center space-x-1.5 px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 font-mono text-[10px]">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span>LIVE 6.82M/s</span>
+          </div>
+
+          <!-- Insights Drawer Toggle Button -->
+          <button id="toggle-watchdog-btn" class="flex items-center space-x-1.5 px-3 py-1 rounded border border-purple-300 bg-purple-50 text-purple-800 font-semibold shadow-xs hover:bg-purple-100 transition">
+            <span class="w-2 h-2 rounded-full bg-pink-500 pulse-dot"></span>
+            <span id="insights-btn-label">⚡ Insights</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Search & Filter Row -->
+      <div class="px-4 py-2 bg-white border-b border-[#e1e3e8] shrink-0">
+        <div class="flex items-center space-x-3">
+          <span class="font-bold text-xs text-slate-800 whitespace-nowrap">Search for</span>
+          <div class="flex-1 relative flex items-center">
+            <i class="fa-solid fa-magnifying-glass absolute left-3 text-slate-400 text-xs pointer-events-none"></i>
+            <input 
+              type="text" 
+              id="search-input" 
+              placeholder="Filter your logs (e.g. error, email-api-py, BlockInfo, timeout)" 
+              class="w-full bg-[#f8fafc] border border-slate-300 hover:border-slate-400 focus:bg-white rounded pl-8 pr-8 py-1.5 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-purple-600 font-mono transition"
+            >
+            <button id="clear-search-btn" class="absolute right-2.5 text-slate-400 hover:text-slate-600 text-xs hidden">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Control Row -->
+      <div class="px-4 py-1.5 bg-[#fbfcfd] border-b border-[#e1e3e8] flex items-center justify-between shrink-0 text-xs text-slate-600">
+        <div class="flex items-center space-x-6">
+          <div class="flex items-center space-x-1.5">
+            <span class="text-slate-500 font-medium">Group into</span>
+            <button id="group-fields-btn" class="group-btn px-2.5 py-0.5 rounded font-semibold text-slate-800 bg-[#e2e8f0] border border-slate-300">
+              Fields
+            </button>
+            <button id="group-patterns-btn" class="group-btn px-2.5 py-0.5 rounded font-normal text-slate-600 hover:bg-slate-200 border border-transparent">
+              Patterns
+            </button>
+            <button id="group-transactions-btn" class="group-btn px-2.5 py-0.5 rounded font-normal text-slate-600 hover:bg-slate-200 border border-transparent">
+              Transactions
+            </button>
+          </div>
+
+          <div class="h-3.5 w-px bg-slate-300"></div>
+
+          <div class="flex items-center space-x-1.5">
+            <span class="text-slate-500 font-medium">Visualize as</span>
+            <button id="vis-list-btn" class="vis-btn px-2.5 py-0.5 rounded font-semibold text-slate-800 bg-[#e2e8f0] border border-slate-300">
+              List
+            </button>
+            <button id="vis-timeseries-btn" class="vis-btn px-2.5 py-0.5 rounded font-normal text-slate-600 hover:bg-slate-200 border border-transparent">
+              Timeseries
+            </button>
+            <button id="vis-toplist-btn" class="vis-btn px-2.5 py-0.5 rounded font-normal text-slate-600 hover:bg-slate-200 border border-transparent">
+              Top List
+            </button>
+            <button id="vis-table-btn" class="vis-btn px-2.5 py-0.5 rounded font-normal text-slate-600 hover:bg-slate-200 border border-transparent">
+              Table
+            </button>
+          </div>
+        </div>
+
+        <button id="reset-all-filters-btn" class="text-purple-700 hover:text-purple-900 font-semibold text-xs">
+          Reset filters
+        </button>
+      </div>
+
+      <!-- Meaningful & Real-Time Ingestion Histogram -->
+      <div class="px-4 pt-2.5 pb-2 bg-white border-b border-[#e1e3e8] shrink-0">
+        <div class="flex flex-wrap items-center justify-between mb-1.5 text-xs gap-2">
+          <div class="flex items-center space-x-2">
+            <span class="font-bold text-slate-800 text-[11px] uppercase tracking-wider flex items-center">
+              <i class="fa-solid fa-chart-column text-purple-700 mr-1.5"></i>
+              Live Log Ingestion & Anomaly Volume Timeline
+            </span>
+            <span class="text-slate-400">•</span>
+            <span class="text-[11px] text-slate-500 font-mono" id="timeline-window-label">10-Minute Rolling Ingestion (Local Clock)</span>
+          </div>
+          <!-- Legend Explaining What This Graph Does -->
+          <div class="flex items-center space-x-3 text-[11px]">
+            <div class="flex items-center space-x-1.5" title="Nominal incoming log traffic across all active microservices (~72k-84k logs/min)">
+              <span class="w-2.5 h-2.5 rounded-xs bg-[#38bdf8]"></span>
+              <span class="text-slate-600 font-medium">Normal Logs (~78k/min)</span>
+            </div>
+            <div class="flex items-center space-x-1.5" title="Statistical anomaly error spikes detected by Cloud Net Watchdog">
+              <span class="w-2.5 h-2.5 rounded-xs bg-[#ea3875]"></span>
+              <span class="text-slate-700 font-bold">Anomaly & Error Spikes</span>
+            </div>
+            <div class="flex items-center space-x-1 px-1.5 py-0.2 rounded bg-emerald-50 text-emerald-700 text-[10px] font-bold border border-emerald-200" title="Deterministic autonomous remediation policies triggered">
+              <i class="fa-solid fa-bolt text-[8px]"></i>
+              <span>Auto-Healed</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Histogram Visual Bars -->
+        <div class="flex h-12 relative">
+          <div class="w-9 flex flex-col justify-between text-[10px] font-mono text-slate-400 select-none pb-2">
+            <span>100k</span>
+            <span>0k</span>
+          </div>
+          <div class="flex-1 flex flex-col justify-end relative">
+            <div class="flex-1 flex items-end justify-between px-1 space-x-1 pb-1" id="main-timeline-bars">
+            </div>
+            <div class="flex justify-between text-[9px] font-mono text-slate-500 px-1 border-t border-slate-200 pt-0.5" id="timeline-ticks-row">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Split Pane (Sidebar + Table + Insights Drawer) -->
+      <div class="flex-1 flex min-h-0 relative overflow-hidden">
+        
+        <!-- LEFT FACETS SIDEBAR (Index, Source, Host are FULLY POPULATED & INTERACTIVE) -->
+        <aside class="w-64 bg-white border-r border-[#e1e3e8] flex flex-col shrink-0 overflow-y-auto custom-scrollbar text-xs">
+          
+          <div class="p-2.5 border-b border-slate-100">
+            <div class="relative">
+              <i class="fa-solid fa-magnifying-glass absolute left-2.5 top-2 text-slate-400 text-xs"></i>
+              <input 
+                type="text" 
+                id="facet-search-input"
+                placeholder="Search facets" 
+                class="w-full bg-[#f8fafc] border border-slate-200 rounded py-1 pl-7 pr-2 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-purple-600"
+              >
+            </div>
+          </div>
+
+          <div class="px-3 py-1.5 flex items-center justify-between text-[11px] text-slate-500 border-b border-slate-100">
+            <div class="flex items-center space-x-1">
+              <i class="fa-solid fa-pen text-[10px] text-slate-400 mr-1"></i>
+              <span>Showing <span id="facet-showing-count" class="font-semibold text-slate-700">6,821,395</span></span>
+            </div>
+            <button onclick="openAddFacetModal()" class="text-purple-700 font-bold hover:underline transition hover:text-purple-900">+ Add</button>
+          </div>
+
+          <div class="p-3 space-y-3">
+            <!-- CORE Section: Index, Source, Host (Populated & Interactive!) -->
+            <div>
+              <div class="text-[11px] font-bold text-slate-700 uppercase tracking-wide mb-1.5 flex items-center justify-between">
+                <span class="flex items-center"><i class="fa-solid fa-chevron-down text-[8px] mr-1.5 text-purple-700"></i>CORE</span>
+              </div>
+
+              <!-- 1. Index Facet (Populated) -->
+              <div class="mb-2">
+                <div onclick="toggleFacetSection('index-facet-list', 'index-chevron')" class="flex items-center justify-between py-1 text-slate-700 font-semibold cursor-pointer hover:text-purple-700 select-none">
+                  <span class="flex items-center"><i id="index-chevron" class="fa-solid fa-chevron-down text-[8px] mr-1.5 text-slate-400"></i>Index</span>
+                  <span class="text-[10px] text-slate-400 font-mono">3</span>
+                </div>
+                <div id="index-facet-list" class="space-y-1 pl-3 pt-0.5">
+                  <label class="facet-row flex items-center justify-between py-0.5 px-1 rounded hover:bg-slate-50 cursor-pointer text-slate-700">
+                    <span class="flex items-center space-x-2">
+                      <input type="checkbox" name="index-cb" value="main" checked class="rounded text-purple-600 focus:ring-purple-500 border-slate-300">
+                      <span class="text-xs">main</span>
+                    </span>
+                    <span class="font-mono text-slate-400 text-[10px]">5.14M</span>
+                  </label>
+                  <label class="facet-row flex items-center justify-between py-0.5 px-1 rounded hover:bg-slate-50 cursor-pointer text-slate-700">
+                    <span class="flex items-center space-x-2">
+                      <input type="checkbox" name="index-cb" value="hdfs-archive" checked class="rounded text-purple-600 focus:ring-purple-500 border-slate-300">
+                      <span class="text-xs">hdfs-archive</span>
+                    </span>
+                    <span class="font-mono text-slate-400 text-[10px]">1.28M</span>
+                  </label>
+                  <label class="facet-row flex items-center justify-between py-0.5 px-1 rounded hover:bg-slate-50 cursor-pointer text-slate-700">
+                    <span class="flex items-center space-x-2">
+                      <input type="checkbox" name="index-cb" value="audit" checked class="rounded text-purple-600 focus:ring-purple-500 border-slate-300">
+                      <span class="text-xs">audit</span>
+                    </span>
+                    <span class="font-mono text-slate-400 text-[10px]">398K</span>
+                  </label>
+                </div>
+              </div>
+
+              <!-- 2. Source Facet (Populated) -->
+              <div class="mb-2">
+                <div onclick="toggleFacetSection('source-facet-list', 'source-chevron')" class="flex items-center justify-between py-1 text-slate-700 font-semibold cursor-pointer hover:text-purple-700 select-none">
+                  <span class="flex items-center"><i id="source-chevron" class="fa-solid fa-chevron-down text-[8px] mr-1.5 text-slate-400"></i>Source</span>
+                  <span class="text-[10px] text-slate-400 font-mono">6</span>
+                </div>
+                <div id="source-facet-list" class="space-y-1 pl-3 pt-0.5">
+                  <label class="facet-row flex items-center justify-between py-0.5 px-1 rounded hover:bg-slate-50 cursor-pointer text-slate-700">
+                    <span class="flex items-center space-x-2">
+                      <input type="checkbox" name="source-cb" value="python" checked class="rounded text-purple-600 focus:ring-purple-500 border-slate-300">
+                      <span class="text-xs">python</span>
+                    </span>
+                    <span class="font-mono text-slate-400 text-[10px]">2.42M</span>
+                  </label>
+                  <label class="facet-row flex items-center justify-between py-0.5 px-1 rounded hover:bg-slate-50 cursor-pointer text-slate-700">
+                    <span class="flex items-center space-x-2">
+                      <input type="checkbox" name="source-cb" value="auth-dotnet-internal" checked class="rounded text-purple-600 focus:ring-purple-500 border-slate-300">
+                      <span class="text-xs truncate max-w-[110px]" title="auth-dotnet-internal">auth-dotnet...</span>
+                    </span>
+                    <span class="font-mono text-slate-400 text-[10px]">1.61M</span>
+                  </label>
+                  <label class="facet-row flex items-center justify-between py-0.5 px-1 rounded hover:bg-slate-50 cursor-pointer text-slate-700">
+                    <span class="flex items-center space-x-2">
+                      <input type="checkbox" name="source-cb" value="nodejs" checked class="rounded text-purple-600 focus:ring-purple-500 border-slate-300">
+                      <span class="text-xs">nodejs</span>
+                    </span>
+                    <span class="font-mono text-slate-400 text-[10px]">1.79M</span>
+                  </label>
+                  <label class="facet-row flex items-center justify-between py-0.5 px-1 rounded hover:bg-slate-50 cursor-pointer text-slate-700">
+                    <span class="flex items-center space-x-2">
+                      <input type="checkbox" name="source-cb" value="golang" checked class="rounded text-purple-600 focus:ring-purple-500 border-slate-300">
+                      <span class="text-xs">golang</span>
+                    </span>
+                    <span class="font-mono text-slate-400 text-[10px]">398K</span>
+                  </label>
+                  <label class="facet-row flex items-center justify-between py-0.5 px-1 rounded hover:bg-slate-50 cursor-pointer text-slate-700">
+                    <span class="flex items-center space-x-2">
+                      <input type="checkbox" name="source-cb" value="mongodb" checked class="rounded text-purple-600 focus:ring-purple-500 border-slate-300">
+                      <span class="text-xs">mongodb</span>
+                    </span>
+                    <span class="font-mono text-slate-400 text-[10px]">340K</span>
+                  </label>
+                </div>
+              </div>
+
+              <!-- 3. Host Facet (Populated) -->
+              <div class="mb-2">
+                <div onclick="toggleFacetSection('host-facet-list', 'host-chevron')" class="flex items-center justify-between py-1 text-slate-700 font-semibold cursor-pointer hover:text-purple-700 select-none">
+                  <span class="flex items-center"><i id="host-chevron" class="fa-solid fa-chevron-down text-[8px] mr-1.5 text-slate-400"></i>Host</span>
+                  <span class="text-[10px] text-slate-400 font-mono">5</span>
+                </div>
+                <div id="host-facet-list" class="space-y-1 pl-3 pt-0.5">
+                  <label class="facet-row flex items-center justify-between py-0.5 px-1 rounded hover:bg-slate-50 cursor-pointer text-slate-700">
+                    <span class="flex items-center space-x-2">
+                      <input type="checkbox" name="host-cb" value="gke-us-east-web" checked class="rounded text-purple-600 focus:ring-purple-500 border-slate-300">
+                      <span class="text-xs truncate max-w-[110px]" title="gke-us-east-web">gke-web</span>
+                    </span>
+                    <span class="font-mono text-slate-400 text-[10px]">1.79M</span>
+                  </label>
+                  <label class="facet-row flex items-center justify-between py-0.5 px-1 rounded hover:bg-slate-50 cursor-pointer text-slate-700">
+                    <span class="flex items-center space-x-2">
+                      <input type="checkbox" name="host-cb" value="gke-us-east-auth" checked class="rounded text-purple-600 focus:ring-purple-500 border-slate-300">
+                      <span class="text-xs truncate max-w-[110px]" title="gke-us-east-auth">gke-auth</span>
+                    </span>
+                    <span class="font-mono text-slate-400 text-[10px]">1.61M</span>
+                  </label>
+                  <label class="facet-row flex items-center justify-between py-0.5 px-1 rounded hover:bg-slate-50 cursor-pointer text-slate-700">
+                    <span class="flex items-center space-x-2">
+                      <input type="checkbox" name="host-cb" value="gke-us-east-email" checked class="rounded text-purple-600 focus:ring-purple-500 border-slate-300">
+                      <span class="text-xs truncate max-w-[110px]" title="gke-us-east-email">gke-email</span>
+                    </span>
+                    <span class="font-mono text-slate-400 text-[10px]">785K</span>
+                  </label>
+                  <label class="facet-row flex items-center justify-between py-0.5 px-1 rounded hover:bg-slate-50 cursor-pointer text-slate-700">
+                    <span class="flex items-center space-x-2">
+                      <input type="checkbox" name="host-cb" value="gke-us-east-ad" checked class="rounded text-purple-600 focus:ring-purple-500 border-slate-300">
+                      <span class="text-xs truncate max-w-[110px]" title="gke-us-east-ad">gke-ad</span>
+                    </span>
+                    <span class="font-mono text-slate-400 text-[10px]">398K</span>
+                  </label>
+                  <label class="facet-row flex items-center justify-between py-0.5 px-1 rounded hover:bg-slate-50 cursor-pointer text-slate-700">
+                    <span class="flex items-center space-x-2">
+                      <input type="checkbox" name="host-cb" value="mongo-primary" checked class="rounded text-purple-600 focus:ring-purple-500 border-slate-300">
+                      <span class="text-xs truncate max-w-[110px]" title="mongo-primary">mongo-primary</span>
+                    </span>
+                    <span class="font-mono text-slate-400 text-[10px]">340K</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <!-- Service Section -->
+            <div>
+              <div class="text-[11px] font-bold text-slate-700 mb-1 flex items-center justify-between">
+                <span><i class="fa-solid fa-chevron-down text-[8px] mr-1.5 text-purple-700"></i>Service</span>
+              </div>
+              <div class="space-y-1.5 pt-1" id="service-checkboxes-container">
+                <label class="facet-row flex items-center justify-between py-0.5 px-1 rounded hover:bg-slate-50 cursor-pointer text-slate-700">
+                  <span class="flex items-center space-x-2">
+                    <input type="checkbox" name="service-cb" value="web-store" checked class="rounded text-purple-600 focus:ring-purple-500 border-slate-300">
+                    <span class="text-xs font-medium">web-store</span>
+                  </span>
+                  <span class="font-mono text-slate-500 text-[11px]">1.79M</span>
+                </label>
+                <label class="facet-row flex items-center justify-between py-0.5 px-1 rounded hover:bg-slate-50 cursor-pointer text-slate-700">
+                  <span class="flex items-center space-x-2">
+                    <input type="checkbox" name="service-cb" value="auth-dotnet" checked class="rounded text-purple-600 focus:ring-purple-500 border-slate-300">
+                    <span class="text-xs font-medium">auth-dotnet</span>
+                  </span>
+                  <span class="font-mono text-slate-500 text-[11px]">1.61M</span>
+                </label>
+                <label class="facet-row flex items-center justify-between py-0.5 px-1 rounded hover:bg-slate-50 cursor-pointer text-slate-700">
+                  <span class="flex items-center space-x-2">
+                    <input type="checkbox" name="service-cb" value="email-api-py" checked class="rounded text-purple-600 focus:ring-purple-500 border-slate-300">
+                    <span class="text-xs font-medium">email-api-py</span>
+                  </span>
+                  <span class="font-mono text-slate-500 text-[11px]">785K</span>
+                </label>
+                <label class="facet-row flex items-center justify-between py-0.5 px-1 rounded hover:bg-slate-50 cursor-pointer text-slate-700">
+                  <span class="flex items-center space-x-2">
+                    <input type="checkbox" name="service-cb" value="ad-server" checked class="rounded text-purple-600 focus:ring-purple-500 border-slate-300">
+                    <span class="text-xs font-medium">ad-server</span>
+                  </span>
+                  <span class="font-mono text-slate-500 text-[11px]">398K</span>
+                </label>
+                <label class="facet-row flex items-center justify-between py-0.5 px-1 rounded hover:bg-slate-50 cursor-pointer text-slate-700">
+                  <span class="flex items-center space-x-2">
+                    <input type="checkbox" name="service-cb" value="email-queue-processor" checked class="rounded text-purple-600 focus:ring-purple-500 border-slate-300">
+                    <span class="text-xs font-medium truncate max-w-[120px]" title="email-queue-processor">email-queue-process...</span>
+                  </span>
+                  <span class="font-mono text-slate-500 text-[11px]">370K</span>
+                </label>
+                <label class="facet-row flex items-center justify-between py-0.5 px-1 rounded hover:bg-slate-50 cursor-pointer text-slate-700">
+                  <span class="flex items-center space-x-2">
+                    <input type="checkbox" name="service-cb" value="web-store-mongo" checked class="rounded text-purple-600 focus:ring-purple-500 border-slate-300">
+                    <span class="text-xs font-medium">web-store-mongo</span>
+                  </span>
+                  <span class="font-mono text-slate-500 text-[11px]">340K</span>
+                </label>
+              </div>
+            </div>
+
+            <div class="border-t border-slate-200"></div>
+
+            <!-- Status Facet -->
+            <div>
+              <div class="text-[11px] font-bold text-slate-700 mb-1">Status</div>
+              <div class="space-y-1 pl-1">
+                <label class="flex items-center space-x-2 cursor-pointer">
+                  <input type="radio" name="status-radio" value="all" checked class="text-purple-600">
+                  <span>All Statuses</span>
+                </label>
+                <label class="flex items-center space-x-2 cursor-pointer text-rose-700 font-semibold">
+                  <input type="radio" name="status-radio" value="anomaly" class="text-purple-600">
+                  <span>Anomalies Only</span>
+                </label>
+                <label class="flex items-center space-x-2 cursor-pointer">
+                  <input type="radio" name="status-radio" value="normal" class="text-purple-600">
+                  <span>Normal Logs</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Custom Facets Container (Added via + Add button) -->
+            <div id="custom-facets-section" class="space-y-3 pt-2 border-t border-slate-200 hidden">
+              <div class="text-[11px] font-bold text-slate-700 uppercase tracking-wide flex items-center justify-between">
+                <span class="flex items-center"><i class="fa-solid fa-star text-[9px] mr-1.5 text-amber-500"></i>CUSTOM FACETS</span>
+                <span id="custom-facets-count" class="text-[10px] text-purple-700 font-mono font-bold">0</span>
+              </div>
+              <div id="custom-facets-list" class="space-y-2"></div>
+            </div>
+
+          </div>
+        </aside>
+
+        <!-- Center Logs Table View -->
+        <section class="flex-1 flex flex-col min-w-0 bg-white overflow-hidden" id="center-view-container">
+          <div class="px-3 py-1.5 bg-[#fbfcfd] border-b border-[#e1e3e8] flex items-center justify-between text-xs text-slate-500 shrink-0">
+            <div class="flex items-center space-x-3">
+              <span class="font-mono text-slate-700 font-bold">6,821,395 records</span>
+            </div>
+            <div class="flex items-center space-x-2">
+              <button id="prev-page-btn" class="px-2 py-0.5 bg-white border border-slate-300 rounded hover:bg-slate-50 disabled:opacity-40">
+                <i class="fa-solid fa-chevron-left text-[10px]"></i>
+              </button>
+              <span class="font-mono text-slate-600 text-[11px]">
+                Page <span id="current-page">1</span> of <span id="total-pages">80</span>
+              </span>
+              <button id="next-page-btn" class="px-2 py-0.5 bg-white border border-slate-300 rounded hover:bg-slate-50 disabled:opacity-40">
+                <i class="fa-solid fa-chevron-right text-[10px]"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="flex-1 overflow-y-auto custom-scrollbar" id="dynamic-content-area">
+            <table class="w-full text-left text-xs border-collapse" id="logs-table">
+              <thead class="bg-[#f8fafc] border-b border-[#e1e3e8] text-slate-600 sticky top-0 z-10 font-medium">
+                <tr>
+                  <th class="py-2 px-3 w-40 text-slate-500">↓ DATE</th>
+                  <th class="py-2 px-3 w-44">HOST</th>
+                  <th class="py-2 px-3 w-32">SERVICE</th>
+                  <th class="py-2 px-3">CONTENT</th>
+                </tr>
+              </thead>
+              <tbody id="logs-tbody" class="divide-y divide-slate-100 font-mono text-[11px]">
+                <tr><td colspan="4" class="py-8 text-center text-slate-400">Loading logs...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Right Insights Drawer (Renamed to Insights, Healed Items Removed) -->
+        <aside id="watchdog-insights-panel" class="w-[460px] bg-white border-l border-[#e1e3e8] flex flex-col shrink-0 overflow-y-auto custom-scrollbar shadow-lg z-20">
+          <div class="p-4 bg-white border-b border-[#e1e3e8] sticky top-0 z-10">
+            <div class="flex items-center justify-between mb-2">
+              <div class="flex items-center space-x-2">
+                <h2 class="font-bold text-sm text-[#212529] tracking-tight">Insights</h2>
+                <span class="bg-pink-100 text-pink-700 text-[10px] font-bold px-1.5 py-0.2 rounded font-mono">LIVE</span>
+              </div>
+              <div class="flex items-center space-x-1.5 text-xs text-slate-600 font-mono">
+                <span class="bg-slate-100 border border-slate-200 px-1.5 py-0.2 rounded font-bold text-slate-700 text-[11px]">15m</span>
+              </div>
+            </div>
+
+            <div class="relative mt-2">
+              <i class="fa-solid fa-magnifying-glass absolute left-3 top-2 text-slate-400 text-xs"></i>
+              <input 
+                type="text" 
+                id="watchdog-search-input"
+                placeholder="Search Insights" 
+                class="w-full bg-[#f8fafc] border border-slate-200 rounded py-1 pl-8 pr-2 text-xs text-slate-800 focus:outline-none focus:border-purple-600"
+              >
+            </div>
+
+            <div class="mt-3 pt-2 border-t border-slate-100">
+              <div class="flex h-9 relative">
+                <div class="w-7 flex flex-col justify-between text-[9px] font-mono text-slate-400 pb-1">
+                  <span>100k</span>
+                  <span>0k</span>
+                </div>
+                <div class="flex-1 flex flex-col justify-end">
+                  <div class="flex-1 flex items-end justify-between space-x-0.5 pb-0.5" id="watchdog-mini-bars"></div>
+                  <div class="flex justify-between text-[8px] font-mono text-slate-400 border-t border-slate-200 pt-0.5">
+                    <span>13:11</span>
+                    <span>13:14</span>
+                    <span>13:17</span>
+                    <span>13:20</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="p-4 space-y-4" id="watchdog-cards-container"></div>
+        </aside>
+
+      </div>
+    </div>
+
+<!-- ----------------------------------------------------------------------- -->
+    <!-- DASHBOARD 2: MONITORS & ALERTS (Interactive with Real-Time Backup Ledger) -->
+    <!-- ----------------------------------------------------------------------- -->
+    <div id="view-dashboard-monitors" class="hidden flex-1 flex-col min-h-0 bg-slate-50 overflow-y-auto custom-scrollbar p-6 space-y-6">
+      
+      <!-- Top Title & Action Bar -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-200 pb-4 gap-3">
+        <div>
+          <div class="flex items-center space-x-2">
+            <h2 class="text-xl font-bold text-slate-900 flex items-center">
+              <i class="fa-solid fa-bell text-purple-700 mr-2"></i>
+              Production Monitors & Real-Time Triggered Alerts
+            </h2>
+            <span class="px-2 py-0.5 rounded-full bg-rose-100 text-rose-700 font-mono text-[10px] font-bold border border-rose-200 flex items-center">
+              <span class="w-1.5 h-1.5 rounded-full bg-rose-500 animate-ping mr-1"></span>
+              2 Alerting
+            </span>
+          </div>
+          <p class="text-xs text-slate-500 mt-1 flex items-center space-x-2">
+            <span>Automated threshold evaluation, live SLA breach triggers, and sub-second autonomous healing policies.</span>
+            <span class="text-slate-300">•</span>
+            <span class="font-mono text-purple-700 font-semibold" id="monitors-clock-ticker">LIVE EVALUATION CLOCK</span>
+          </p>
+        </div>
+
+        <div class="flex items-center space-x-2 shrink-0">
+
+          <button onclick="openNewMonitorModal()" class="px-3.5 py-1.5 rounded bg-purple-700 hover:bg-purple-800 text-white font-bold text-xs shadow-xs transition flex items-center space-x-1.5">
+            <i class="fa-solid fa-plus text-[10px]"></i>
+            <span>+ New Monitor</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Monitor Filter Pills & Search -->
+      <div class="flex flex-wrap items-center justify-between gap-3 bg-white p-3 rounded-lg border border-slate-200 text-xs">
+        <div class="flex items-center space-x-2">
+          <span class="text-slate-400 font-semibold text-[11px] mr-1">Filter:</span>
+          <button onclick="filterMonitorTiles('all', this)" class="monitor-tab-btn px-2.5 py-1 rounded-md font-bold bg-purple-100 text-purple-800 border border-purple-200 transition">
+            All (<span id="mon-count-all">6</span>)
+          </button>
+          <button onclick="filterMonitorTiles('alerting', this)" class="monitor-tab-btn px-2.5 py-1 rounded-md font-semibold text-rose-700 hover:bg-rose-50 border border-transparent hover:border-rose-200 transition">
+            Triggered / Alerting (<span id="mon-count-alerting">2</span>)
+          </button>
+          <button onclick="filterMonitorTiles('healed', this)" class="monitor-tab-btn px-2.5 py-1 rounded-md font-semibold text-emerald-700 hover:bg-emerald-50 border border-transparent hover:border-emerald-200 transition">
+            Auto-Healed (<span id="mon-count-healed">2</span>)
+          </button>
+          <button onclick="filterMonitorTiles('ok', this)" class="monitor-tab-btn px-2.5 py-1 rounded-md font-semibold text-slate-600 hover:bg-slate-100 border border-transparent transition">
+            Nominal OK (<span id="mon-count-ok">2</span>)
+          </button>
+        </div>
+
+        <div class="flex items-center space-x-2">
+          <input type="text" id="monitor-search-input" onkeyup="searchMonitorTiles(this.value)" placeholder="Search monitors, metrics, tags..." class="px-2.5 py-1 bg-slate-50 border border-slate-200 rounded text-xs text-slate-800 focus:outline-none focus:border-purple-600 w-52">
+        </div>
+      </div>
+
+      <!-- Monitor Cards Grid (Interactive, Live Values, Action Buttons) -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="monitors-cards-grid">
+        
+        <!-- Tile 1: CRITICAL REPLICATION -->
+        <div class="monitor-card bg-white p-4 rounded-lg border border-rose-300 shadow-xs space-y-3" data-status="alerting">
+          <div class="flex items-start justify-between">
+            <div>
+              <div class="flex items-center space-x-2">
+                <span class="status-badge px-2 py-0.5 rounded bg-rose-100 text-rose-800 font-mono text-[10px] font-bold border border-rose-200 animate-pulse">CRITICAL (ALERTING)</span>
+                <span class="text-[10px] text-slate-400 font-mono">ID: MON-9012</span>
+              </div>
+              <h4 class="font-bold text-xs text-slate-900 mt-1">HDFS Block Under-Replication SLA Monitor</h4>
+            </div>
+            <span class="val-display text-rose-600 font-mono text-sm font-extrabold">1/3 Replicas</span>
+          </div>
+
+          <p class="text-xs text-slate-600">PendingReplicationMonitor reports 18 blocks missing rack-level parity. Trigger condition: <code>under_replicated &gt; 0</code>.</p>
+          
+          <div class="p-2.5 bg-rose-50/60 rounded border border-rose-100 text-[11px] font-mono text-rose-900 flex justify-between items-center">
+            <span>Breach Duration: 42s • Rack 02 Affected</span>
+            <span class="eval-time text-slate-500">Evaluated: Just now</span>
+          </div>
+
+          <div class="flex items-center justify-between pt-1 border-t border-slate-100 text-xs">
+            <button onclick="executeMonitorHeal('MON-9012', 'FORCE_RE_REPLICATION', this)" class="px-3 py-1 rounded bg-purple-700 hover:bg-purple-800 text-white font-bold text-[11px] shadow-xs flex items-center space-x-1.5 transition">
+              <i class="fa-solid fa-wand-magic-sparkles text-[10px]"></i>
+              <span>⚡ Execute Auto-Heal Now</span>
+            </button>
+            <button onclick="toggleMuteMonitor(this)" class="text-slate-500 hover:text-slate-800 text-[11px] font-medium">
+              <i class="fa-solid fa-bell-slash mr-1"></i> Mute 1h
+            </button>
+          </div>
+        </div>
+
+        <!-- Tile 2: CRITICAL METADATA DESYNC -->
+        <div class="monitor-card bg-white p-4 rounded-lg border border-rose-300 shadow-xs space-y-3" data-status="alerting">
+          <div class="flex items-start justify-between">
+            <div>
+              <div class="flex items-center space-x-2">
+                <span class="status-badge px-2 py-0.5 rounded bg-rose-100 text-rose-800 font-mono text-[10px] font-bold border border-rose-200 animate-pulse">CRITICAL (ALERTING)</span>
+                <span class="text-[10px] text-slate-400 font-mono">ID: MON-8841</span>
+              </div>
+              <h4 class="font-bold text-xs text-slate-900 mt-1">DataNode VolumeMap Consistency Check</h4>
+            </div>
+            <span class="val-display text-rose-600 font-mono text-sm font-extrabold">+380/min</span>
+          </div>
+
+          <p class="text-xs text-slate-600">Orphaned block pointers detected in invalidSet. Trigger condition: <code>E35_BlockInfo_NotFound &gt; 10/min</code>.</p>
+          
+          <div class="p-2.5 bg-rose-50/60 rounded border border-rose-100 text-[11px] font-mono text-rose-900 flex justify-between items-center">
+            <span>Service: auth-dotnet • Node: pool-1-13</span>
+            <span class="eval-time text-slate-500">Evaluated: Just now</span>
+          </div>
+
+          <div class="flex items-center justify-between pt-1 border-t border-slate-100 text-xs">
+            <button onclick="executeMonitorHeal('MON-8841', 'FSCK_METADATA_RESYNC', this)" class="px-3 py-1 rounded bg-purple-700 hover:bg-purple-800 text-white font-bold text-[11px] shadow-xs flex items-center space-x-1.5 transition">
+              <i class="fa-solid fa-wrench text-[10px]"></i>
+              <span>⚡ Resync FSCK & Purge Now</span>
+            </button>
+            <button onclick="toggleMuteMonitor(this)" class="text-slate-500 hover:text-slate-800 text-[11px] font-medium">
+              <i class="fa-solid fa-bell-slash mr-1"></i> Mute 1h
+            </button>
+          </div>
+        </div>
+
+        <!-- Tile 3: AUTO-HEALED THREAD CONTENTION -->
+        <div class="monitor-card bg-white p-4 rounded-lg border border-slate-200 shadow-xs space-y-3" data-status="healed">
+          <div class="flex items-start justify-between">
+            <div>
+              <div class="flex items-center space-x-2">
+                <span class="status-badge px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-mono text-[10px] font-bold border border-emerald-200">AUTO-HEALED</span>
+                <span class="text-[10px] text-slate-400 font-mono">ID: MON-7104</span>
+              </div>
+              <h4 class="font-bold text-xs text-slate-900 mt-1">DataXceiver Thread Pool Concurrency</h4>
+            </div>
+            <span class="val-display text-emerald-700 font-mono text-sm font-extrabold">284 / 1024</span>
+          </div>
+
+          <p class="text-xs text-slate-600">Active threads recovered from 100% saturation. Trigger condition: <code>active_threads &gt; 85%</code>.</p>
+          
+          <div class="p-2.5 bg-emerald-50/70 rounded border border-emerald-100 text-[11px] font-mono text-emerald-950 flex justify-between items-center">
+            <span>Remediated in 310 ms • Zero Deadlocks</span>
+            <span class="text-emerald-700 font-bold">100% HEALTHY</span>
+          </div>
+
+          <div class="flex items-center justify-between pt-1 border-t border-slate-100 text-xs">
+            <span class="text-[10px] text-slate-500 font-mono">Automated Action: RECYCLE_THREAD_POOL</span>
+            
+          </div>
+        </div>
+
+        <!-- Tile 4: AUTO-HEALED SOCKET FAILOVER -->
+        <div class="monitor-card bg-white p-4 rounded-lg border border-slate-200 shadow-xs space-y-3" data-status="healed">
+          <div class="flex items-start justify-between">
+            <div>
+              <div class="flex items-center space-x-2">
+                <span class="status-badge px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-mono text-[10px] font-bold border border-emerald-200">AUTO-HEALED</span>
+                <span class="text-[10px] text-slate-400 font-mono">ID: MON-6632</span>
+              </div>
+              <h4 class="font-bold text-xs text-slate-900 mt-1">TCP Socket Write Timeout Circuit Breaker</h4>
+            </div>
+            <span class="val-display text-emerald-700 font-mono text-sm font-extrabold">0.01% Stall</span>
+          </div>
+
+          <p class="text-xs text-slate-600">Socket connection failed over to healthy secondary replica. Trigger condition: <code>write_timeout &gt; 1%</code>.</p>
+          
+          <div class="p-2.5 bg-emerald-50/70 rounded border border-emerald-100 text-[11px] font-mono text-emerald-950 flex justify-between items-center">
+            <span>Failover Latency: 320 ms • 0 Drops</span>
+            <span class="text-emerald-700 font-bold">CIRCUIT CLOSED</span>
+          </div>
+
+          <div class="flex items-center justify-between pt-1 border-t border-slate-100 text-xs">
+            <span class="text-[10px] text-slate-500 font-mono">Automated Action: TCP_SOCKET_FAILOVER</span>
+            
+          </div>
+        </div>
+
+        <!-- Tile 5: OK INGESTION SLA -->
+        <div class="monitor-card bg-white p-4 rounded-lg border border-slate-200 shadow-xs space-y-3" data-status="ok">
+          <div class="flex items-start justify-between">
+            <div>
+              <div class="flex items-center space-x-2">
+                <span class="status-badge px-2 py-0.5 rounded bg-sky-100 text-sky-800 font-mono text-[10px] font-bold border border-sky-200">NOMINAL OK</span>
+                <span class="text-[10px] text-slate-400 font-mono">ID: MON-5011</span>
+              </div>
+              <h4 class="font-bold text-xs text-slate-900 mt-1">Multi-Service Ingestion Latency SLA</h4>
+            </div>
+            <span class="val-display text-slate-800 font-mono text-sm font-extrabold">42 ms (P95)</span>
+          </div>
+
+          <p class="text-xs text-slate-600">Median pipeline latency across 6.82M logs/sec. Threshold: <code>p95_delay &gt; 250ms</code>.</p>
+          
+          <div class="p-2.5 bg-slate-50 rounded border border-slate-200 text-[11px] font-mono text-slate-700 flex justify-between items-center">
+            <span>Buffer Headroom: 82% • P99: 110ms</span>
+            <span class="text-emerald-600 font-bold">SLA COMPLIANT</span>
+          </div>
+
+          <div class="flex items-center justify-between pt-1 border-t border-slate-100 text-xs">
+            <span class="text-[10px] text-slate-400 font-mono">Evaluated continuously</span>
+            
+          </div>
+        </div>
+
+        <!-- Tile 6: OK JVM HEAP -->
+        <div class="monitor-card bg-white p-4 rounded-lg border border-slate-200 shadow-xs space-y-3" data-status="ok">
+          <div class="flex items-start justify-between">
+            <div>
+              <div class="flex items-center space-x-2">
+                <span class="status-badge px-2 py-0.5 rounded bg-sky-100 text-sky-800 font-mono text-[10px] font-bold border border-sky-200">NOMINAL OK</span>
+                <span class="text-[10px] text-slate-400 font-mono">ID: MON-4190</span>
+              </div>
+              <h4 class="font-bold text-xs text-slate-900 mt-1">DataNode JVM Heap & GC Pause Headroom</h4>
+            </div>
+    </div>
+
+            <span class="val-display text-slate-800 font-mono text-sm font-extrabold">14 ms Pause</span>
+          </div>
+
+          <p class="text-xs text-slate-600">Garbage collection latency & OldGen occupancy. Threshold: <code>gc_pause &gt; 800ms</code>.</p>
+          
+          <div class="p-2.5 bg-slate-50 rounded border border-slate-200 text-[11px] font-mono text-slate-700 flex justify-between items-center">
+            <span>Heap Used: 3.4 GB / 8.0 GB (42%)</span>
+            <span class="text-emerald-600 font-bold">OPTIMAL</span>
+          </div>
+
+          <div class="flex items-center justify-between pt-1 border-t border-slate-100 text-xs">
+            <span class="text-[10px] text-slate-400 font-mono">Evaluated continuously</span>
+            
+          </div>
+        </div>
+
+      </div>
+
+    <!-- ----------------------------------------------------------------------- -->
+    <!-- DASHBOARD 5: POINT-IN-TIME BACKUP & PERSISTENT HISTORICAL ARCHIVE -->
+    <!-- ----------------------------------------------------------------------- -->
+    <div id="view-dashboard-history" class="hidden flex-1 flex-col min-h-0 bg-slate-50 overflow-y-auto custom-scrollbar p-6 space-y-6">
+      
+      <!-- Header (NO Snapshot Now button) -->
+      <div class="flex flex-col md:flex-row md:items-center justify-between border-b border-slate-200 pb-4 gap-4">
+        <div>
+          <h2 class="text-xl font-bold text-slate-900 flex items-center">
+            <i class="fa-solid fa-clock-rotate-left text-purple-700 mr-2.5"></i>
+            History & Persistent Audit Ledger
+          </h2>
+          <p class="text-xs text-slate-500 mt-1">
+            Search persistent historical archives across <strong>Yesterday</strong> and <strong>Today</strong>. All events, block mutations, and automated remediation records are stored permanently and never vanish.
+          </p>
+        </div>
+        <div class="flex items-center space-x-2 shrink-0">
+          <span class="px-3 py-1 rounded bg-purple-100 text-purple-800 font-mono text-xs font-bold border border-purple-200">
+            <i class="fa-solid fa-database mr-1"></i>Immutable Historical Store
+          </span>
+        </div>
+      </div>
+
+      <!-- Search & Date Filter Bar -->
+      <div class="bg-white rounded-lg border border-slate-200 p-4 shadow-xs space-y-3">
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+          <!-- Live Search Input for Previous Data -->
+          <div class="flex-1 relative">
+            <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-xs pointer-events-none"></i>
+            <input 
+              type="text" 
+              id="backup-history-search-input" 
+              oninput="onBackupSearchInput(this.value)"
+              placeholder="Search previous data (e.g. volumeMap, blk_..., auth-dotnet, E35, yesterday, Nov 20, 14:30, error)..." 
+              class="w-full bg-[#f8fafc] border border-slate-300 hover:border-slate-400 focus:bg-white rounded pl-9 pr-8 py-2 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-purple-600 font-mono transition"
+            >
+            <button id="backup-clear-search-btn" onclick="clearBackupSearch()" class="absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-600 text-xs hidden">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+
+          <!-- Quick Date Filter Tabs -->
+          <div class="flex items-center space-x-1.5 shrink-0 text-xs">
+            <button onclick="setBackupHistoryDate('all', this)" class="backup-date-tab px-3 py-1.5 rounded font-bold bg-purple-100 text-purple-800 border border-purple-200">
+              All History
+            </button>
+          </div>
+        </div>
+
+        <!-- Category Filter Pills & Metrics -->
+        <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-100 text-xs">
+          <div class="flex items-center space-x-2">
+            <span class="text-slate-500 font-medium">Filter by:</span>
+            <button onclick="setBackupCategory('all', this)" class="backup-cat-pill px-2.5 py-1 rounded-full text-[11px] font-bold bg-slate-800 text-white">
+              All Events
+            </button>
+            <button onclick="setBackupCategory('volumemap', this)" class="backup-cat-pill px-2.5 py-1 rounded-full text-[11px] font-medium bg-slate-100 text-slate-700 hover:bg-slate-200">
+              HDFS VolumeMap Audits
+            </button>
+            <button onclick="setBackupCategory('anomalies', this)" class="backup-cat-pill px-2.5 py-1 rounded-full text-[11px] font-medium bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100">
+              Anomalies & Remediations
+            </button>
+          </div>
+
+          <div class="flex items-center space-x-3 text-slate-500 font-mono text-[11px]">
+            <span>Showing: <strong id="backup-total-count" class="text-purple-700">300</strong> stored records</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Persistent Historical Records Table (Does not vanish!) -->
+      <div class="bg-white rounded-lg border border-slate-200 shadow-xs overflow-hidden">
+        <div class="p-3.5 bg-slate-50 border-b border-slate-200 flex items-center justify-between text-xs">
+          <div class="flex items-center space-x-2">
+            <h3 class="font-bold text-slate-800">Stored Historical Audit Trail</h3>
+            <span class="text-[10px] px-2 py-0.5 rounded bg-purple-50 text-purple-700 font-mono font-semibold">Cold Storage & Replication Verified</span>
+          </div>
+          <!-- Pagination -->
+          <div class="flex items-center space-x-2">
+            <button id="backup-prev-btn" onclick="prevBackupPage()" class="px-2 py-0.5 bg-white border border-slate-300 rounded hover:bg-slate-50 disabled:opacity-40 text-xs">
+              <i class="fa-solid fa-chevron-left text-[10px]"></i>
+            </button>
+            <span class="font-mono text-slate-600 text-[11px]">Page <span id="backup-cur-page">1</span> of <span id="backup-tot-pages">15</span></span>
+            <button id="backup-next-btn" onclick="nextBackupPage()" class="px-2 py-0.5 bg-white border border-slate-300 rounded hover:bg-slate-50 disabled:opacity-40 text-xs">
+              <i class="fa-solid fa-chevron-right text-[10px]"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs border-collapse font-mono">
+            <thead class="bg-[#f8fafc] border-b border-slate-200 text-slate-600 font-sans font-medium text-[11px]">
+              <tr>
+                <th class="py-2.5 px-4 w-44">TIMESTAMP</th>
+                <th class="py-2.5 px-3 w-32">SERVICE</th>
+                <th class="py-2.5 px-3 w-36">SUBSYSTEM</th>
+                <th class="py-2.5 px-3 w-28">STATUS</th>
+                <th class="py-2.5 px-4">TRANSACTION & AUDIT ACTIVITY</th>
+                <th class="py-2.5 px-4">AUTONOMOUS RESOLUTION</th>
+                <th class="py-2.5 px-3 w-36">ARTIFACT / HASH</th>
+              </tr>
+            </thead>
+            <tbody id="backup-history-tbody" class="divide-y divide-slate-100 text-[11px]">
+              <tr><td colspan="7" class="py-8 text-center text-slate-400 font-sans">Loading persistent historical data...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Verifiable Historical Snapshot Archive -->
+      <div class="bg-white rounded-lg border border-slate-200 shadow-xs overflow-hidden">
+        <div class="p-3.5 bg-slate-50 border-b border-slate-200 flex items-center justify-between text-xs">
+          <div>
+            <h3 class="font-bold text-slate-800">Verifiable Daily & Hourly Checkpoint Archives</h3>
+            <p class="text-slate-500 text-[11px] mt-0.5">Cold storage snapshots for <strong>Yesterday</strong> and <strong>Today</strong> with SHA-256 cryptographic verification.</p>
+          </div>
+          <span class="text-[10px] px-2 py-0.5 rounded bg-purple-100 text-purple-800 font-bold font-mono">Immutable Backups</span>
+        </div>
+        <div class="p-4">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3" id="backup-snapshots-cards-container">
+            <!-- Dynamic snapshot cards rendered by JS -->
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+  <!-- ========================================================================= -->
+  <!-- WORKING ACCOUNT & USER PROFILE MODAL (Clicked via CN avatar at dock bottom) -->
+  <!-- ========================================================================= -->
+  <div id="account-modal" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl shadow-2xl border border-slate-200 w-full max-w-lg overflow-hidden animate-fadeIn text-xs">
+      
+      <!-- Profile Header -->
+      <div class="p-5 bg-gradient-to-r from-[#171b26] to-[#252c3d] text-white flex items-center justify-between">
+        <div class="flex items-center space-x-3.5">
+          <div class="w-12 h-12 rounded-full bg-gradient-to-tr from-purple-500 to-pink-500 text-white font-bold flex items-center justify-center text-base shadow-md border-2 border-purple-300">
+            MS
+          </div>
+          <div>
+            <div class="flex items-center space-x-2">
+              <h3 class="font-bold text-base text-white">Mansi M</h3>
+              <span class="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-mono text-[9px] font-bold border border-emerald-500/30">ONLINE</span>
+            </div>
+            <p class="text-[11px] text-purple-200">Lead Cloud Observability & Infrastructure Architect</p>
+            <p class="text-[10px] text-slate-400 font-mono">mansi.m@cloudnet.io</p>
+          </div>
+        </div>
+        <button onclick="closeAccountModal()" class="text-slate-400 hover:text-white p-1 rounded hover:bg-white/10 transition">
+          <i class="fa-solid fa-xmark text-sm"></i>
+        </button>
+      </div>
+
+      <!-- Profile Body -->
+      <div class="p-5 space-y-4">
+        
+        <!-- Role & Permissions Card -->
+        <div class="grid grid-cols-2 gap-3">
+          <div class="p-3 bg-purple-50/70 border border-purple-100 rounded-lg">
+            <span class="text-slate-500 text-[10px] uppercase font-bold tracking-wider">Access Level</span>
+            <div class="font-bold text-slate-800 text-xs mt-0.5 flex items-center">
+              <i class="fa-solid fa-shield-halved text-purple-600 mr-1.5"></i>
+              Super Administrator
+            </div>
+            <p class="text-[10px] text-slate-500 mt-1">Full Cluster Read/Write & Policy Dispatches</p>
+          </div>
+
+          <div class="p-3 bg-slate-50 border border-slate-200 rounded-lg">
+            <span class="text-slate-500 text-[10px] uppercase font-bold tracking-wider">Organization</span>
+            <div class="font-bold text-slate-800 text-xs mt-0.5 flex items-center">
+              <i class="fa-solid fa-building text-slate-600 mr-1.5"></i>
+              Cloud Net Enterprise
+            </div>
+            <p class="text-[10px] text-purple-700 font-mono mt-1">cn-org-941 (us-east-1)</p>
+          </div>
+        </div>
+
+        <!-- Telemetry Quotas & Usage -->
+        <div class="p-3.5 bg-slate-50 rounded-lg border border-slate-200 space-y-2">
+          <div class="flex items-center justify-between text-[11px]">
+            <span class="font-bold text-slate-700">Cluster Log Ingestion Quota</span>
+            <span class="font-mono text-emerald-700 font-bold">6,821,395 / 10,000,000 (68%)</span>
+          </div>
+          <div class="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
+            <div class="bg-gradient-to-r from-purple-500 to-indigo-600 h-2 rounded-full" style="width: 68%;"></div>
+          </div>
+          <div class="flex justify-between text-[10px] text-slate-500">
+            <span>Billing Cycle: Enterprise Pro Trial</span>
+            <span>Resets in 18 days</span>
+          </div>
+        </div>
+
+        <!-- Live API Key Management -->
+        <div class="space-y-1.5">
+          <label class="block text-slate-700 font-semibold">Active Production API Key</label>
+          <div class="flex items-center space-x-2">
+            <input type="text" readonly value="cn_live_8f3a9e2d7c1b4e0a99ff" id="api-key-box" class="flex-1 bg-slate-100 border border-slate-300 rounded p-2 font-mono text-xs text-slate-700 select-all">
+            <button onclick="copyApiKey()" id="copy-key-btn" class="px-3.5 py-2 rounded bg-purple-700 hover:bg-purple-800 text-white font-bold text-xs shadow-xs transition flex items-center space-x-1.5">
+              <i class="fa-solid fa-copy"></i>
+              <span>Copy</span>
+            </button>
+          </div>
+          <p class="text-[10px] text-slate-400">Used for programmatic log forwarding via OpenTelemetry / FluentBit.</p>
+        </div>
+
+        <!-- Session Status -->
+        <div class="pt-2 border-t border-slate-200 flex items-center justify-between text-slate-500 text-[11px]">
+          <span class="flex items-center">
+            <i class="fa-solid fa-laptop text-slate-400 mr-1.5"></i>
+            Active session: Chrome on Windows (127.0.0.1)
+          </span>
+          <div class="flex items-center space-x-2">
+            <button onclick="closeAccountModal()" class="px-4 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded font-semibold transition">
+              Close Profile
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- LOG INSPECTOR MODAL -->
+  <div id="inspector-modal" class="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs hidden flex items-center justify-center p-4">
+    <div class="bg-white border border-slate-200 rounded-lg w-full max-w-2xl max-h-[85vh] flex flex-col shadow-2xl overflow-hidden animate-fadeIn text-xs">
+      <div class="p-3 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+        <div class="flex items-center space-x-2">
+          <i class="fa-solid fa-bug text-purple-700"></i>
+          <span class="font-bold text-slate-900" id="modal-log-title">Log Diagnostic Telemetry</span>
+        </div>
+        <button id="close-modal-btn" class="text-slate-400 hover:text-slate-700">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="p-4 overflow-y-auto space-y-3 custom-scrollbar">
+        <div class="p-3 rounded bg-purple-50 border border-purple-200 text-purple-950">
+          <div class="font-bold text-xs flex items-center justify-between">
+            <span>⚡ Cloud Net Autonomous Self-Healing Execution:</span>
+            <span class="text-emerald-700 font-mono font-bold" id="modal-speedup">7,500x Speedup</span>
+          </div>
+          <div class="mt-1 text-[11px] text-slate-700" id="modal-healing-details">
+            FSCK VolumeMap consistency verified (0 orphan pointers; status=HEALTHY) in 280 ms.
+          </div>
+        </div>
+
+        <div>
+          <div class="font-bold text-slate-700 mb-1">Raw Log Message:</div>
+          <pre class="bg-slate-900 text-slate-100 p-3 rounded font-mono text-[11px] whitespace-pre-wrap leading-relaxed" id="modal-raw-content"></pre>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2 text-[11px]">
+          <div class="bg-slate-50 p-2 rounded border border-slate-200">
+            <span class="text-slate-400">Host:</span> <span id="modal-host" class="font-mono text-slate-800"></span>
+          </div>
+          <div class="bg-slate-50 p-2 rounded border border-slate-200">
+            <span class="text-slate-400">Service:</span> <span id="modal-service" class="font-mono text-slate-800"></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="p-2.5 bg-slate-50 border-t border-slate-200 text-right">
+        <button id="close-modal-btn2" class="px-3 py-1 bg-slate-200 hover:bg-slate-300 text-slate-800 rounded font-semibold text-xs">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/app.js"></script>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: CREATE NEW ALERT MONITOR -->
+  <!-- ========================================================================= -->
+  <div id="new-monitor-modal" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl shadow-2xl border border-slate-200 w-full max-w-lg overflow-hidden animate-fadeIn text-xs">
+      <div class="p-4 bg-gradient-to-r from-purple-800 to-indigo-900 text-white flex items-center justify-between">
+        <div class="flex items-center space-x-2">
+          <i class="fa-solid fa-bell text-pink-400"></i>
+          <span class="font-bold text-sm">Create New Production Health Monitor</span>
+        </div>
+        <button onclick="closeNewMonitorModal()" class="text-purple-200 hover:text-white">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <form onsubmit="submitNewMonitor(event)" class="p-6 space-y-4">
+        <div>
+          <label class="block text-slate-700 font-semibold mb-1">Monitor Name *</label>
+          <input type="text" id="new-mon-name" required placeholder="e.g. HDFS DataNode Write Stalls & Timeout Monitor" class="w-full px-3 py-2 border border-slate-300 rounded text-slate-800 focus:outline-none focus:border-purple-600">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-slate-700 font-semibold mb-1">Target Service *</label>
+            <select id="new-mon-service" class="w-full px-3 py-2 border border-slate-300 rounded text-slate-800 focus:outline-none focus:border-purple-600">
+              <option value="auth-dotnet">auth-dotnet (Authentication)</option>
+              <option value="email-api-py">email-api-py (Worker I/O)</option>
+              <option value="web-store">web-store (Frontend)</option>
+              <option value="ad-server">ad-server (Golang)</option>
+              <option value="email-queue-processor">email-queue-processor</option>
+              <option value="web-store-mongo">web-store-mongo</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-slate-700 font-semibold mb-1">Condition Trigger *</label>
+            <select id="new-mon-condition" class="w-full px-3 py-2 border border-slate-300 rounded text-slate-800 focus:outline-none focus:border-purple-600">
+              <option value="Latency > 300ms">Latency > 300ms (P95)</option>
+              <option value="Error Rate > 5%">Error Rate > 5% anomaly</option>
+              <option value="Under-Replicated > 0">Under-Replicated Blocks > 0</option>
+              <option value="VolumeMap Desync > 0">VolumeMap Desync > 0</option>
+              <option value="Thread Capacity > 85%">Thread Capacity > 85%</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-slate-700 font-semibold mb-1">Severity</label>
+            <select id="new-mon-severity" class="w-full px-3 py-2 border border-slate-300 rounded text-slate-800 focus:outline-none focus:border-purple-600">
+              <option value="alerting">CRITICAL (Alerting & Page)</option>
+              <option value="warn">WARNING (Slack Notification)</option>
+              <option value="ok">INFO (Audit Only)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-slate-700 font-semibold mb-1">Notification Routing</label>
+            <input type="text" readonly value="PagerDuty • mansi.m@cloudnet.io" class="w-full px-3 py-2 border border-slate-200 bg-slate-100 rounded text-slate-600 font-mono text-[11px]">
+          </div>
+        </div>
+
+        <div class="p-3 bg-purple-50 rounded border border-purple-200 flex items-center space-x-2">
+          <input type="checkbox" id="new-mon-auto-heal" checked class="rounded text-purple-600 focus:ring-purple-500">
+          <label for="new-mon-auto-heal" class="text-[11px] text-purple-950 font-semibold">
+            Automatically dispatch closed-loop Automated Self-Healing Action when triggered
+          </label>
+        </div>
+
+        <div class="flex items-center space-x-2 pt-2">
+          <button type="submit" class="flex-1 py-2.5 rounded bg-purple-700 hover:bg-purple-800 text-white font-bold text-center shadow-md transition">
+            Save & Deploy Monitor
+          </button>
+          <button type="button" onclick="closeNewMonitorModal()" class="px-4 py-2.5 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold transition">
+            Cancel
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- REAL-TIME ALERT TOAST / POP-UP NOTIFICATION (Top-Right Slide-In) -->
+  <!-- ========================================================================= -->
+  <div id="alert-notification-popup" class="fixed top-14 right-5 z-50 max-w-sm bg-white rounded-lg shadow-2xl border-l-4 border-rose-500 p-3.5 space-y-2 hidden transform transition-all duration-300 translate-x-full text-xs">
+    <div class="flex items-start justify-between">
+      <div class="flex items-center space-x-2">
+        <span class="w-2.5 h-2.5 rounded-full bg-rose-500 animate-ping"></span>
+        <span class="font-bold text-rose-700 uppercase tracking-wider text-[10px]">Critical SLA Breach</span>
+      </div>
+      <button onclick="dismissAlertToast()" class="text-slate-400 hover:text-slate-700 text-sm">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+    <div class="font-semibold text-slate-900" id="alert-toast-title">HDFS Under-Replication Anomaly Surge</div>
+    <p class="text-[11px] text-slate-600 leading-snug" id="alert-toast-body">Rack 02 parity dropped below replication factor=3. Pre-remediation snapshot created and autonomous healing dispatched.</p>
+    <div class="flex items-center justify-between pt-1 font-mono text-[10px]">
+      <span class="text-slate-400" id="alert-toast-time">Just now</span>
+      <button onclick="switchMainDashboard('monitors'); dismissAlertToast();" class="text-purple-700 hover:text-purple-900 font-bold">
+        View in Monitors →
+      </button>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- ADD CUSTOM FACET / ATTRIBUTE MODAL (Clicked via + Add beside Showing count) -->
+  <!-- ========================================================================= -->
+  <div id="add-facet-modal" class="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl shadow-2xl border border-slate-200 w-full max-w-md overflow-hidden animate-fadeIn text-xs">
+      <div class="p-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+        <div class="flex items-center space-x-2">
+          <i class="fa-solid fa-filter text-purple-700"></i>
+          <h3 class="font-bold text-sm text-slate-800">Add Attribute / Facet to Sidebar</h3>
+        </div>
+        <button onclick="closeAddFacetModal()" class="text-slate-400 hover:text-slate-600">
+          <i class="fa-solid fa-xmark text-sm"></i>
+        </button>
+      </div>
+
+      <div class="p-5 space-y-4">
+        <div>
+          <label class="block text-slate-700 font-semibold mb-1">Recommended Discovered Attributes</label>
+          <p class="text-[11px] text-slate-500 mb-2">Select an indexed tag to pin it as a filter facet in the left sidebar:</p>
+          <div class="space-y-1.5" id="suggested-facets-list">
+            <button type="button" onclick="addNewCustomFacet('datacenter', 'string')" class="w-full text-left p-2 rounded border border-slate-200 hover:border-purple-300 hover:bg-purple-50 flex items-center justify-between transition">
+              <div>
+                <span class="font-bold text-slate-800 font-mono">datacenter</span>
+                <span class="text-[10px] text-slate-400 block">us-east-1 (3.2M), us-west-2 (2.1M), eu-central-1 (1.5M)</span>
+              </div>
+              <span class="text-purple-700 text-xs font-bold">+ Pin</span>
+            </button>
+            <button type="button" onclick="addNewCustomFacet('http.status_code', 'number')" class="w-full text-left p-2 rounded border border-slate-200 hover:border-purple-300 hover:bg-purple-50 flex items-center justify-between transition">
+              <div>
+                <span class="font-bold text-slate-800 font-mono">http.status_code</span>
+                <span class="text-[10px] text-slate-400 block">200 (6.1M), 500 (234K), 404 (310K)</span>
+              </div>
+              <span class="text-purple-700 text-xs font-bold">+ Pin</span>
+            </button>
+            <button type="button" onclick="addNewCustomFacet('k8s.pod', 'string')" class="w-full text-left p-2 rounded border border-slate-200 hover:border-purple-300 hover:bg-purple-50 flex items-center justify-between transition">
+              <div>
+                <span class="font-bold text-slate-800 font-mono">k8s.pod</span>
+                <span class="text-[10px] text-slate-400 block">auth-pod-14 (1.6M), web-pod-02 (1.8M)</span>
+              </div>
+              <span class="text-purple-700 text-xs font-bold">+ Pin</span>
+            </button>
+            <button type="button" onclick="addNewCustomFacet('client.ip', 'ip')" class="w-full text-left p-2 rounded border border-slate-200 hover:border-purple-300 hover:bg-purple-50 flex items-center justify-between transition">
+              <div>
+                <span class="font-bold text-slate-800 font-mono">client.ip</span>
+                <span class="text-[10px] text-slate-400 block">10.0.1.x subnet, 10.0.2.x subnet</span>
+              </div>
+              <span class="text-purple-700 text-xs font-bold">+ Pin</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="pt-2 border-t border-slate-100">
+          <label class="block text-slate-700 font-semibold mb-1">Or Add Custom Facet Path</label>
+          <div class="flex items-center space-x-2">
+            <input type="text" id="custom-facet-input" placeholder="e.g. env_region, build_version" class="flex-1 bg-slate-50 border border-slate-200 rounded px-3 py-1.5 text-xs text-slate-800 font-mono focus:border-purple-600 outline-none">
+            <button type="button" onclick="submitCustomFacetInput()" class="px-3 py-1.5 rounded bg-purple-700 hover:bg-purple-800 text-white font-bold transition">
+              Add
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>
